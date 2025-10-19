@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcieu21xj00ta"]
+
+[ext_resource type="Script" uid="uid://ciqb5iu162wf7" path="res://Global Scripts/rts_controller_example.gd" id="1_0jimv"]
+
+[node name="RTSController" type="Node3D"]
+script = ExtResource("1_0jimv")
+
+[node name="Elevation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.885038, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Elevation"]
+transform = Transform3D(0.992146, -0.09737, -0.0785142, 0.116161, 0.484453, 0.867071, -0.0463903, -0.869382, 0.491958, 0, 0, 0)
