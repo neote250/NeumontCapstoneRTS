@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://1cmfjqxuuyw1"]
+
+[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
+[ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
+
+[node name="Squad" type="Node3D"]
+process_mode = 3
+script = ExtResource("1_xp1uv")
+
+[node name="CameraMount" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.840387, 0.541987, 0, -0.541987, 0.840387, 0.339889, 4.66579, 6.25614)
+
+[node name="Unit" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="Unit2" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.78904, 0, 2.56073)
+
+[node name="Unit3" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.52071, 0, 2.07345)
+
+[editable path="Unit"]
+[editable path="Unit/skeleton_mage"]
+[editable path="Unit2"]
+[editable path="Unit2/skeleton_mage"]
+[editable path="Unit3"]
+[editable path="Unit3/skeleton_mage"]

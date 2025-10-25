@@ -1,9 +1,11 @@
-[gd_scene load_steps=11 format=3 uid="uid://bnihdwdhoyrnp"]
+[gd_scene load_steps=14 format=3 uid="uid://bnihdwdhoyrnp"]
 
 [ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://demo/components/Environment.tscn" id="1_e13gr"]
 [ext_resource type="Terrain3DMaterial" uid="uid://bm26shwyoeo1d" path="res://Map/new_terrain_3d_material.tres" id="1_ohof8"]
 [ext_resource type="Terrain3DAssets" uid="uid://dlgdagdqlrmdx" path="res://Map/new_terrain_3d_assets.tres" id="2_08stc"]
-[ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/proto_controller.tscn" id="3_08stc"]
+[ext_resource type="Script" uid="uid://bw06xtofvfhh6" path="res://Player/rts_controller.gd" id="4_uf72f"]
+[ext_resource type="PackedScene" uid="uid://1cmfjqxuuyw1" path="res://Models/squad.tscn" id="5_lhttk"]
+[ext_resource type="PackedScene" uid="uid://cg2r12q47xhbd" path="res://UI/ui.tscn" id="6_uf72f"]
 
 [sub_resource type="Shader" id="Shader_e13gr"]
 code = "// NOTE: Shader automatically converted from Godot Engine 4.4.stable.mono's StandardMaterial3D.
@@ -146,7 +148,19 @@ shader_parameter/uv2_offset = Vector3(0, 0, 0)
 
 [sub_resource type="BoxMesh" id="BoxMesh_w7w4i"]
 material = SubResource("ShaderMaterial_lhttk")
-size = Vector3(250, 3, 250)
+size = Vector3(190, 3, 240)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uf72f"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.666296, 0.41713, 0.478861, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_size = 6
 
 [node name="Node3D" type="Node3D"]
 
@@ -156,20 +170,63 @@ size = Vector3(250, 3, 250)
 data_directory = "res://Map"
 material = ExtResource("1_ohof8")
 assets = ExtResource("2_08stc")
+collision_mode = 3
+collision_layer = 3
+collision_mask = 3
 top_level = true
 metadata/_edit_lock_ = true
-
-[node name="ProtoController" parent="." instance=ExtResource("3_08stc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 42.5645, 34.4415, 188.61)
-can_sprint = true
-can_freefly = true
-input_left = "move_left"
-input_right = "move_right"
-input_forward = "move_up"
-input_back = "move_down"
-input_jump = "jump"
 
 [node name="Water" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 138.891, -3.0327, 133.852)
 mesh = SubResource("BoxMesh_w7w4i")
 skeleton = NodePath("../Terrain3D")
+
+[node name="Player" type="Node" parent="."]
+script = ExtResource("4_uf72f")
+
+[node name="UI" parent="Player" instance=ExtResource("6_uf72f")]
+
+[node name="MinimapContainer" type="PanelContainer" parent="Player"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -228.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = 228.0
+grow_horizontal = 0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uf72f")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Player/MinimapContainer"]
+layout_mode = 2
+stretch = true
+
+[node name="Minimap" type="SubViewport" parent="Player/MinimapContainer/SubViewportContainer"]
+handle_input_locally = false
+size = Vector2i(197, 197)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="Player/MinimapContainer/SubViewportContainer/Minimap"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 124, 160, 125)
+
+[node name="StartingSquad" parent="Player" groups=["player_squads"] instance=ExtResource("5_lhttk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 204.983, 18.543, 204.782)
+top_level = true
+
+[node name="Camera3D" type="Camera3D" parent="Player"]
+
+[node name="Squad" parent="Player" groups=["player_squads"] instance=ExtResource("5_lhttk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 111.727, 0.27031, 53.2523)
+
+[node name="EnemyGroup" parent="." instance=ExtResource("5_lhttk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 44.9695, 16.4751, 197.751)
+
+[editable path="Player/StartingSquad"]
+[editable path="Player/StartingSquad/Unit"]
+[editable path="Player/StartingSquad/Unit/skeleton_mage"]
+[editable path="Player/StartingSquad/Unit2"]
+[editable path="Player/StartingSquad/Unit2/skeleton_mage"]
+[editable path="Player/StartingSquad/Unit3"]
+[editable path="Player/StartingSquad/Unit3/skeleton_mage"]

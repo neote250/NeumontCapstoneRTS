@@ -8,3 +8,7 @@ extends Node
 
 #keep track of team's resources in player controller?
 #player controller should manage 
+
+
+#func _ready() -> void:
+	#Terrain3d.set_camera(camera)

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dcieu21xj00ta"]
 
-[ext_resource type="Script" uid="uid://ciqb5iu162wf7" path="res://Global Scripts/rts_controller_example.gd" id="1_0jimv"]
+[ext_resource type="Script" uid="uid://ciqb5iu162wf7" path="res://Player/rts_controller_example.gd" id="1_0jimv"]
 
 [node name="RTSController" type="Node3D"]
 script = ExtResource("1_0jimv")

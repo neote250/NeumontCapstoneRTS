@@ -1,0 +1,54 @@
+[gd_scene load_steps=13 format=3 uid="uid://g8yosfq1j87r"]
+
+[ext_resource type="Script" uid="uid://cn7wxq3kln833" path="res://UI/selection_wheel.gd" id="1_t2uwe"]
+[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_options.gd" id="2_xe57u"]
+[ext_resource type="Texture2D" uid="uid://4cwveasnqjtv" path="res://Assets/icons/war.png" id="3_6sr5e"]
+[ext_resource type="Texture2D" uid="uid://drq63jam1mv6x" path="res://Assets/icons/cross-swords.png" id="4_safyw"]
+[ext_resource type="Texture2D" uid="uid://swyp66tqbang" path="res://Assets/icons/knight.png" id="5_uo4va"]
+[ext_resource type="Texture2D" uid="uid://c2w6jmr5wf783" path="res://Assets/icons/maps.png" id="6_6a64n"]
+[ext_resource type="Texture2D" uid="uid://45nexd0caphf" path="res://Assets/icons/arrow.png" id="7_8y20f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ngkpb"]
+atlas = ExtResource("3_6sr5e")
+script = ExtResource("2_xe57u")
+name = 0
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ukkcn"]
+atlas = ExtResource("4_safyw")
+script = ExtResource("2_xe57u")
+name = 1
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rar0w"]
+atlas = ExtResource("5_uo4va")
+script = ExtResource("2_xe57u")
+name = 2
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qn1fj"]
+atlas = ExtResource("6_6a64n")
+script = ExtResource("2_xe57u")
+name = 3
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o27fe"]
+atlas = ExtResource("7_8y20f")
+script = ExtResource("2_xe57u")
+name = 4
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
+
+[node name="Selection_Wheel" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_t2uwe")
+bg_color = Color(0.26779, 0.26779, 0.26779, 1)
+line_color = Color(0.463587, 0.463587, 0.463587, 1)
+highlight_color = Color(0.886262, 0.886261, 0.886262, 1)
+options = Array[ExtResource("2_xe57u")]([SubResource("AtlasTexture_ngkpb"), SubResource("AtlasTexture_ukkcn"), SubResource("AtlasTexture_rar0w"), SubResource("AtlasTexture_qn1fj"), SubResource("AtlasTexture_o27fe")])

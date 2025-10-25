@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://cg2r12q47xhbd"]
+
+[ext_resource type="Script" uid="uid://b10p31b0fp600" path="res://UI/ui.gd" id="1_2fwl4"]
+[ext_resource type="PackedScene" uid="uid://g8yosfq1j87r" path="res://UI/selection_wheel.tscn" id="2_dajm1"]
+
+[node name="UI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+script = ExtResource("1_2fwl4")
+
+[node name="Selection_Wheel" parent="CanvasLayer" instance=ExtResource("2_dajm1")]
+visible = false
