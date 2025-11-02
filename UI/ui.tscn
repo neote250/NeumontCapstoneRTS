@@ -10,9 +10,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+script = ExtResource("1_2fwl4")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
-script = ExtResource("1_2fwl4")
 
 [node name="Selection_Wheel" parent="CanvasLayer" instance=ExtResource("2_dajm1")]
 visible = false
+
+[node name="TestingDataLabel" type="Label" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 32
+text = "I don't know random stuff"

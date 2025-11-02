@@ -12,9 +12,8 @@ var health : int
 func _ready() -> void:
 	health = Max_Health
 
-
 func damage(attack: Attack):
 	health -= attack.attack_damage
 	if health <= 0:
-		emit_signal("died", self)
+		emit_signal("died", get_parent()) #signal to squad which unit died / was self, but that just emits the component node
 		get_parent().queue_free()

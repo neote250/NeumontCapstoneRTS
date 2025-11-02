@@ -11,7 +11,7 @@ signal added_squad(new_squad: Squad, squad_index: int, total_squads: int)
 signal removed_squad(removed_squad: Squad, squad_index: int, total_squads: int)
 
 #squads
-var all_squads: Array[Squad] = []
+@export var all_squads: Array[Squad] = []
 var current_squad_index: int = 0
 var current_squad: Squad = null
 var last_squad_index: int = -1
@@ -20,22 +20,29 @@ var last_squad_index: int = -1
 #Don't have a squadinfopanel yet. need to make one
 #@onready var ui_manager = $"../UI/SquadInfoPanel"
 
-#Camera Nodes
-@onready var camera := $Camera3D
-@onready var current_camera_mount := $StartingSquad/CameraMount
-@onready var minimap := $MinimapContainer/SubViewportContainer/Minimap
+#Camera stuff
+@onready var camera: Camera3D = $Camera3D
+@onready var current_camera_mount: Node3D = $StartingSquad.get_camera_mount()
+@onready var minimap: SubViewport= $MinimapContainer/SubViewportContainer/Minimap
+@onready var minimap_camera: Camera3D = $MinimapContainer/SubViewportContainer/Minimap/Camera3D
+
+var map_coordinates: Vector2 = Vector2(256.0, 256.0)
+
+
+#ui stuff
+@onready var ui: Control = $UI
 
 
 func _ready() -> void:
 	# Find all squads in scene
-	refresh_squad_list()
+	#refresh_squad_list()
 	#set initial squad
 	if all_squads.size() > 0:
 		set_active_squad(0)
 	
 	
 	#camera stuff
-	$"../Terrain3D".set_camera(camera)
+	$"../NavigationRegion3D/Terrain3D".set_camera(camera)
 	camera.global_transform = current_camera_mount.global_transform
 	
 	
@@ -43,15 +50,16 @@ func _ready() -> void:
 	update_camera_target()
 
 func refresh_squad_list():
-	all_squads.clear()
-	var player_squads = get_tree().get_nodes_in_group("player_squads")
-	
-	for squad in player_squads:
-		if squad is Squad:
-			all_squads.append(squad)
+	#all_squads.clear()
+	#var player_squads = get_tree().get_nodes_in_group("player_squads")
+	#
+	#for squad in player_squads:
+		#if squad is Squad:
+			#all_squads.append(squad)
 	
 	# Sort by squad_id for consistent ordering   ####NEEDED???
 	#all_squads.sort_custom(func(a, b): return a.squad_id < b.squad_id)
+	pass
 
 
 
@@ -127,21 +135,27 @@ func set_active_squad(index: int):
 
 func issue_move_command():
 	#currently only for mouse, need to set up for touch     !!!!!!!!!!
-	var mouse_pos = minimap.get_mouse_position()
-	var camera = minimap.get_camera_3d()
+	var mouse_pos = minimap.get_mouse_position() #get the mouse position based on the subviewport
 	
-	var from = camera.project_ray_origin(mouse_pos)
-	var to = from + camera.project_ray_normal(mouse_pos) * 1000
 	
-	var space_state = camera.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(from, to)
-	query.collision_mask = 2  # Ground layer
+	var from = minimap_camera.project_ray_origin(mouse_pos)
+	var to = from + minimap_camera.project_ray_normal(mouse_pos) * 1000
 	
+	var space_state = minimap_camera.get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, to, 2)
+	
+	
+	
+	#need to check if result is a squad or a position, still not implemented
 	var result = space_state.intersect_ray(query)
 	if result:
-		current_squad.move_to(result.position)
+		current_squad.set_target_position(result.position)
 		# Add visual feedback at target position
 		spawn_move_marker(result.position)
+		
+		ui.change_testing_data_text(result.position)
+	
+
 
 
 # Update current squad before calling this function. 
@@ -181,5 +195,6 @@ func _process(delta: float) -> void:
 	#keep following the current squad's camera mount
 	camera.position = camera.position.lerp(current_camera_mount.global_position, 5.0 * delta)
 	#update rotation as well
-	
+	camera.rotation.x = current_squad.rotation.x
+	camera.rotation.y = current_squad.rotation.y
 	#camera.global_position = current_squad.all_units[0].global_position + Vector3(0,5,0)

@@ -1,15 +1,17 @@
-[gd_scene load_steps=6 format=3 uid="uid://blo06fum3fqma"]
+[gd_scene load_steps=7 format=3 uid="uid://blo06fum3fqma"]
 
 [ext_resource type="PackedScene" uid="uid://cpppiqty1a1pu" path="res://Assets/Models/skeleton_mage.glb" id="1_gt656"]
 [ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_vgabi"]
 [ext_resource type="PackedScene" uid="uid://bva8v7auq3pek" path="res://Models/Components/weapon_component.tscn" id="4_7omsi"]
 [ext_resource type="PackedScene" uid="uid://dn65m18cm8q5q" path="res://Models/Components/health_component.tscn" id="4_qojfv"]
+[ext_resource type="Script" uid="uid://t124njj13ydl" path="res://Models/Components/Attack.gd" id="5_qojfv"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gt656"]
 height = 2.24905
 
 [node name="Unit" type="CharacterBody3D" node_paths=PackedStringArray("health_component")]
 process_mode = 3
+collision_mask = 2
 script = ExtResource("1_vgabi")
 health_component = NodePath("HealthComponent")
 
@@ -108,7 +110,12 @@ shape = SubResource("CapsuleShape3D_gt656")
 [node name="HealthComponent" parent="." instance=ExtResource("4_qojfv")]
 process_mode = 3
 
-[node name="WeaponComponent" parent="." instance=ExtResource("4_7omsi")]
+[node name="WeaponComponent" parent="." node_paths=PackedStringArray("AttackOptions") instance=ExtResource("4_7omsi")]
 process_mode = 3
+AttackOptions = [NodePath("BasicShot")]
+
+[node name="BasicShot" type="Node" parent="WeaponComponent"]
+script = ExtResource("5_qojfv")
+metadata/_custom_type_script = "uid://t124njj13ydl"
 
 [editable path="skeleton_mage"]

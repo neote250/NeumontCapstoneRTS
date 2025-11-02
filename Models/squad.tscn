@@ -1,27 +1,37 @@
-[gd_scene load_steps=3 format=3 uid="uid://1cmfjqxuuyw1"]
+[gd_scene load_steps=4 format=3 uid="uid://1cmfjqxuuyw1"]
 
 [ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
 [ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
 
-[node name="Squad" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
+size = Vector3(7.21875, 2.5, 4.48047)
+
+[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("all_units")]
 process_mode = 3
+collision_layer = 4
+collision_mask = 6
 script = ExtResource("1_xp1uv")
+speed = 500
+all_units = [NodePath("Unit"), NodePath("Unit2"), NodePath("Unit3")]
 
 [node name="CameraMount" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.840387, 0.541987, 0, -0.541987, 0.840387, 0.339889, 4.66579, 6.25614)
 
-[node name="Unit" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
+[node name="Unit" parent="." instance=ExtResource("1_gqsy5")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
-[node name="Unit2" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -1.78904, 0, 2.56073)
+[node name="Unit2" parent="." instance=ExtResource("1_gqsy5")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.22089, 0, 1.19578)
 
-[node name="Unit3" parent="." groups=["units_in_group"] instance=ExtResource("1_gqsy5")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.52071, 0, 2.07345)
+[node name="Unit3" parent="." instance=ExtResource("1_gqsy5")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.52071, 0, 1.10179)
 
-[editable path="Unit"]
-[editable path="Unit/skeleton_mage"]
-[editable path="Unit2"]
-[editable path="Unit2/skeleton_mage"]
-[editable path="Unit3"]
-[editable path="Unit3/skeleton_mage"]
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+debug_enabled = true
+debug_path_custom_color = Color(1, 0, 1, 1)
+debug_path_custom_point_size = 17.99
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35225, 1.30846)
+shape = SubResource("BoxShape3D_04802")
+debug_color = Color(0.916016, 7.56615e-05, 0.710749, 0.42)
