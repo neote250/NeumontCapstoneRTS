@@ -1,18 +1,24 @@
-[gd_scene load_steps=4 format=3 uid="uid://1cmfjqxuuyw1"]
+[gd_scene load_steps=10 format=3 uid="uid://1cmfjqxuuyw1"]
 
 [ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
 [ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
+[ext_resource type="Script" uid="uid://dunqtset5we8u" path="res://Models/state_machine.gd" id="3_5tp08"]
+[ext_resource type="Script" uid="uid://ci2tikap17h05" path="res://ready_state.gd" id="4_svthc"]
+[ext_resource type="Script" uid="uid://cmbcjaiibce6q" path="res://target_state.gd" id="5_3ly0y"]
+[ext_resource type="Script" uid="uid://cljp2x5idqm8l" path="res://Models/march_state.gd" id="6_l1b2l"]
+[ext_resource type="Script" uid="uid://cvoj802dacdnp" path="res://Models/warpath_state.gd" id="7_2vagg"]
+[ext_resource type="Script" uid="uid://bbspmxw2afix2" path="res://Models/skirmish_state.gd" id="8_8138w"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
 size = Vector3(7.21875, 2.5, 4.48047)
 
-[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("all_units")]
+[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("all_units", "state_machine")]
 process_mode = 3
 collision_layer = 4
 collision_mask = 6
 script = ExtResource("1_xp1uv")
-speed = 500
 all_units = [NodePath("Unit"), NodePath("Unit2"), NodePath("Unit3")]
+state_machine = NodePath("StateMachine")
 
 [node name="CameraMount" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.840387, 0.541987, 0, -0.541987, 0.840387, 0.339889, 4.66579, 6.25614)
@@ -35,3 +41,34 @@ debug_path_custom_point_size = 17.99
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35225, 1.30846)
 shape = SubResource("BoxShape3D_04802")
 debug_color = Color(0.916016, 7.56615e-05, 0.710749, 0.42)
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("starting_state", "states")]
+script = ExtResource("3_5tp08")
+starting_state = NodePath("ReadyState")
+states = {
+0: NodePath("ReadyState"),
+1: NodePath("WarpathState"),
+2: NodePath("TargetState"),
+3: NodePath("MarchState"),
+4: NodePath("SkirmishState")
+}
+
+[node name="ReadyState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("4_svthc")
+parent = NodePath("../..")
+
+[node name="TargetState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("5_3ly0y")
+parent = NodePath("../..")
+
+[node name="MarchState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("6_l1b2l")
+parent = NodePath("../..")
+
+[node name="WarpathState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("7_2vagg")
+parent = NodePath("../..")
+
+[node name="SkirmishState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("8_8138w")
+parent = NodePath("../..")

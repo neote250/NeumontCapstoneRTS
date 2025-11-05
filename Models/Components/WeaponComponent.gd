@@ -7,6 +7,7 @@ signal deal_damage(target)
 @export var AttackOptions: Array[Attack] = []
 var CurrentAttack: Attack
 var CurrentAttackIndex = 0
+var cooldown_from_attack: float = 0
 
 #var is_damage_positively_modified: bool = false
 #var is_damage_negatively_modified: bool = false
@@ -28,27 +29,22 @@ var CurrentAttackIndex = 0
 		#if is_damage_positively_modified:
 			#damage = damage + (base_damage * modifier)
 
-var target: Unit
+var target_unit: Unit
 
 
 func _ready() -> void:
 	if AttackOptions.size() > 0:
 		CurrentAttack = AttackOptions[0]
 
-func damage_target():
-	#somewhere do a check to make sure there is an attack attached to the unit
-	
-	#move if check to the chase state check. That way I don't have to do it twice
-	if get_xz_distance() < CurrentAttack.attack_range:
-		target.damage(CurrentAttack)
-	
+func damage_target(delta:float) -> void:
+	if cooldown_from_attack > CurrentAttack.attack_speed:
+		target_unit.damage(CurrentAttack)
+		cooldown_from_attack -= CurrentAttack.attack_speed
+	else:
+		cooldown_from_attack += delta
 
-func get_xz_distance() -> float:
-	var dx = target.global_position.x - get_parent().global_position.x
-	var dz = target.global_position.z - get_parent().global_position.z
-	return sqrt(dx*dx + dz*dz)
 
-func swap_weapon():
+func swap_weapon() -> void:
 	if AttackOptions.size()>1:
 		CurrentAttackIndex = (CurrentAttackIndex + 1) % AttackOptions.size()
 		CurrentAttack = AttackOptions[CurrentAttackIndex]

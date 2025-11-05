@@ -2,10 +2,10 @@ extends Node
 class_name RTSController
 
 #signals
-	#tells UI that current squad index has changed
+	#tells game manager that current squad controlled has changed (game manager tells ui)
 signal swap_squad(squad_index: int)
-	#tells UI that something about the current squad has changed
-signal squad_changed(squad_index: int) #also modifiers and num of units????
+	#tells game manager that something about the current squad details have changed
+signal squad_changed(squad_index: int)
 	#tells UI that total squads have changed
 signal added_squad(new_squad: Squad, squad_index: int, total_squads: int)
 signal removed_squad(removed_squad: Squad, squad_index: int, total_squads: int)
@@ -30,36 +30,24 @@ var map_coordinates: Vector2 = Vector2(256.0, 256.0)
 
 
 #ui stuff
-@onready var ui: Control = $UI
-
+@onready var ui: Player_UI = $UI
+@export var move_marker: Resource
 
 func _ready() -> void:
-	# Find all squads in scene
-	#refresh_squad_list()
-	#set initial squad
+	#Squad setup
 	if all_squads.size() > 0:
 		set_active_squad(0)
 	
 	
-	#camera stuff
+	#Camera setup
 	$"../NavigationRegion3D/Terrain3D".set_camera(camera)
 	camera.global_transform = current_camera_mount.global_transform
-	
-	
-	# Set camera to StartingSquad camera mount position
 	update_camera_target()
-
-func refresh_squad_list():
-	#all_squads.clear()
-	#var player_squads = get_tree().get_nodes_in_group("player_squads")
-	#
-	#for squad in player_squads:
-		#if squad is Squad:
-			#all_squads.append(squad)
 	
-	# Sort by squad_id for consistent ordering   ####NEEDED???
-	#all_squads.sort_custom(func(a, b): return a.squad_id < b.squad_id)
-	pass
+	#Signal setup
+	ui.Change_State.connect(Player_State_Input)
+
+
 
 
 
@@ -82,10 +70,14 @@ func _input(event):
 	
 	
 	# Commands for current squad
-	if event.is_action_pressed("target_command") and current_squad:  # right click or TOUCH
-		issue_move_command()
-	elif event.is_action_pressed("stop_command") and current_squad:  # ... or CENTER_RADIAL
+	if event.is_action_pressed("target_command") and current_squad:  # currently left click eventually TOUCH
+		player_click_on_map()
+	elif event.is_action_pressed("stop_command") and current_squad:  # ... or ... 
 		current_squad.stop_movement()
+
+
+func Player_State_Input(new_state: GlobalEnums.STATES):
+	current_squad.state_machine.change_state(current_squad.state_machine.states[new_state])
 
 func cycle_next_squad():
 	if all_squads.size() <= 1:
@@ -133,59 +125,66 @@ func set_active_squad(index: int):
 	# Emit signal for UI updates
 	swap_squad.emit(current_squad_index)
 
-func issue_move_command():
-	#currently only for mouse, need to set up for touch     !!!!!!!!!!
+###Option for player to increase minimap size on LONG press or SHIFT
+func increase_minimap_scale():
+	pass
+
+
+###Handle result of a mouse click on map
+func player_click_on_map():
 	var mouse_pos = minimap.get_mouse_position() #get the mouse position based on the subviewport
 	
-	
+	#Create the vector
 	var from = minimap_camera.project_ray_origin(mouse_pos)
 	var to = from + minimap_camera.project_ray_normal(mouse_pos) * 1000
-	
+	#Setup data
 	var space_state = minimap_camera.get_world_3d().direct_space_state
-	var query = PhysicsRayQueryParameters3D.create(from, to, 2)
+	var land_hit_query = PhysicsRayQueryParameters3D.create(from, to, 2)
+	var squad_hit_query = PhysicsRayQueryParameters3D.create(from, to, 3)
 	
 	
+	#Get results
+	var result = space_state.intersect_ray(land_hit_query)
 	
-	#need to check if result is a squad or a position, still not implemented
-	var result = space_state.intersect_ray(query)
+	#Check if result is a squad otherwise it is a position (or not a result)
+	
 	if result:
 		current_squad.set_target_position(result.position)
-		# Add visual feedback at target position
-		spawn_move_marker(result.position)
-		
+		###DEBUG
 		ui.change_testing_data_text(result.position)
+	else: return
 	
+	# Add visual feedback at target position
+	spawn_move_marker(result.position)
+
+###Handle result of a finger press on map
+func player_press_on_map():
+	pass
 
 
 
-# Update current squad before calling this function. 
-# This is for instant swap of camera position. Not for camera follow??
+
+
+
+###VISUALS
+
+
+### This is for instant swap of camera position.
 func update_camera_target():
 	if camera:
 		camera.global_position = current_camera_mount.global_position
 
 
-
-
-#Separate hour job to get this working
+### Visual feedback for move command
 func spawn_move_marker(position: Vector3):
-	# Visual feedback for move command
-	#var marker = preload("res://MoveMarker.tscn").instantiate()
+	#var marker = move_marker.instantiate()
+	
 	#get_tree().current_scene.add_child(marker)
 	#marker.global_position = position
 	#marker.play_animation()  # Fade out over time
 	pass
 
 
-
-##
-#func get_squad_status(squad: Squad) -> String:
-	#if squad.has_target:
-		#return "Moving"
-	#elif squad.is_active:
-		#return "Active"
-	#else:
-		#return "Idle"
 
 
 
@@ -197,4 +196,3 @@ func _process(delta: float) -> void:
 	#update rotation as well
 	camera.rotation.x = current_squad.rotation.x
 	camera.rotation.y = current_squad.rotation.y
-	#camera.global_position = current_squad.all_units[0].global_position + Vector3(0,5,0)

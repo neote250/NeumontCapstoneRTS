@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://cg2r12q47xhbd"]
+[gd_scene load_steps=4 format=3 uid="uid://cg2r12q47xhbd"]
 
 [ext_resource type="Script" uid="uid://b10p31b0fp600" path="res://UI/ui.gd" id="1_2fwl4"]
 [ext_resource type="PackedScene" uid="uid://g8yosfq1j87r" path="res://UI/selection_wheel.tscn" id="2_dajm1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dajm1"]
 
 [node name="UI" type="Control"]
 layout_mode = 3
@@ -17,9 +19,52 @@ script = ExtResource("1_2fwl4")
 [node name="Selection_Wheel" parent="CanvasLayer" instance=ExtResource("2_dajm1")]
 visible = false
 
-[node name="TestingDataLabel" type="Label" parent="."]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+[node name="TestingDataLabel" type="Label" parent="CanvasLayer"]
+offset_left = 256.0
+offset_right = 658.0
+offset_bottom = 45.0
 theme_override_font_sizes/font_size = 32
-text = "I don't know random stuff"
+text = "DEBUG DATA"
+
+[node name="SquadInfoPanel" type="Panel" parent="CanvasLayer"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 200.0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_dajm1")
+
+[node name="SquadInfoBox" type="VBoxContainer" parent="CanvasLayer/SquadInfoPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SquadActive" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Unit1" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Unit2" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Unit3" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Unit4" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Unit5" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SquadInfo" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+layout_mode = 2
+size_flags_vertical = 3

@@ -1,5 +1,6 @@
 @tool
 extends Control
+class_name SelectionWheel
 
 const SPRITE_SIZE = Vector2(32,32)
 
@@ -16,7 +17,7 @@ const SPRITE_SIZE = Vector2(32,32)
 
 var selection = 0
 
-func Close():
+func Close() -> GlobalEnums.STATES:
 	hide()
 	
 	return options[selection].name
@@ -85,7 +86,6 @@ func _process(delta: float) -> void:
 	else:
 		var mouse_rads = fposmod((mouse_position.angle() + TAU/8) * -1, TAU)
 		selection = ceil((mouse_rads / TAU) * (len(options) - 1))
-
 	
 	
 	queue_redraw()

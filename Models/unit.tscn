@@ -9,11 +9,13 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gt656"]
 height = 2.24905
 
-[node name="Unit" type="CharacterBody3D" node_paths=PackedStringArray("health_component")]
+[node name="Unit" type="CharacterBody3D" node_paths=PackedStringArray("health_component", "weapon_component", "default_attack")]
 process_mode = 3
 collision_mask = 2
 script = ExtResource("1_vgabi")
 health_component = NodePath("HealthComponent")
+weapon_component = NodePath("WeaponComponent")
+default_attack = NodePath("WeaponComponent/BasicShot")
 
 [node name="skeleton_mage" parent="." instance=ExtResource("1_gt656")]
 process_mode = 3
@@ -116,6 +118,7 @@ AttackOptions = [NodePath("BasicShot")]
 
 [node name="BasicShot" type="Node" parent="WeaponComponent"]
 script = ExtResource("5_qojfv")
+attack_range = 200.0
 metadata/_custom_type_script = "uid://t124njj13ydl"
 
 [editable path="skeleton_mage"]
