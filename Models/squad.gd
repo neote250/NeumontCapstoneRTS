@@ -6,7 +6,8 @@ signal selected
 signal deselected
 	#signal for when entire squad dies
 signal squad_terminated(terminated_squad)
-
+	#signal to game controller to deal damage to target squad
+signal GM_Deal_Damage(attack:Attack, gm_target_squad: Squad)
 
 
 #movement
@@ -53,6 +54,7 @@ func _ready() -> void:
 	#everytime a unit in the squad dies, I want to know and be able to do required upkeep
 	for unit in all_units:
 		unit.health_component.died.connect(remove_unit)
+		unit.weapon_component.deal_damage.connect(gm_deal_damage)
 	#for unit: Unit in all_units:
 		#if !unit.weapon_component.CurrentAttack:
 			#unit.weapon_component.CurrentAttack == unit_default_attack
@@ -115,12 +117,15 @@ func take_damage(attack: Attack) -> void:
 		#if unit number changed, update ui and other numbers
 	
 
+###Emit signal to Game Manager and handle updates on the attacking squad (like ammunition depletion)
+func gm_deal_damage(attack: Attack) -> void:
+	GM_Deal_Damage.emit(attack, target_squad)
+
 
 
 
 ###currently this function checks the distance from Unit 1 to the target squad
 func check_range() -> bool:
-	
 	if get_xz_distance_to_location(target_position) < all_units[0].attack_range:
 		return true
 	return false

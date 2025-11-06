@@ -13,13 +13,11 @@ func Exit() -> void:
 	pass
 
 ###For the selected unit, use the current attack and do the associated animations
-func fire_weapons(unit_attack:Attack) -> State:
-	#call the connected animation
-	if parent.target_squad:
-		parent.target_squad.take_damage(unit_attack)
+func fire_weapon(weapon_component:WeaponComponent, delta:float) -> void:
+	weapon_component.damage_target(delta)
+	#and call the connected animation
 	
-	
-	return null
+	return
 
 
 
@@ -36,8 +34,7 @@ func State_Physics_Update(_delta: float) -> State:
 	if !parent.has_target:
 		return parent.state_machine.states[GlobalEnums.STATES.READY]
 	
-	
 	for unit: Unit in parent.all_units:
-		fire_weapons(unit.weapon_component.CurrentAttack)
+		fire_weapon(unit.weapon_component, _delta)
 	
 	return null
