@@ -1,13 +1,18 @@
-[gd_scene load_steps=7 format=3 uid="uid://blo06fum3fqma"]
+[gd_scene load_steps=10 format=3 uid="uid://blo06fum3fqma"]
 
 [ext_resource type="PackedScene" uid="uid://cpppiqty1a1pu" path="res://Assets/Models/skeleton_mage.glb" id="1_gt656"]
 [ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_vgabi"]
 [ext_resource type="PackedScene" uid="uid://bva8v7auq3pek" path="res://Models/Components/weapon_component.tscn" id="4_7omsi"]
 [ext_resource type="PackedScene" uid="uid://dn65m18cm8q5q" path="res://Models/Components/health_component.tscn" id="4_qojfv"]
 [ext_resource type="Script" uid="uid://t124njj13ydl" path="res://Models/Components/Attack.gd" id="5_qojfv"]
+[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://Models/health_bar_3d.gd" id="6_wnveu"]
+[ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="7_xlx51"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gt656"]
-height = 2.24905
+[sub_resource type="BoxShape3D" id="BoxShape3D_wnveu"]
+size = Vector3(1, 0.623901, 1)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_wnveu"]
+viewport_path = NodePath("HealthBar3D/SubViewport")
 
 [node name="Unit" type="CharacterBody3D" node_paths=PackedStringArray("health_component", "weapon_component", "default_attack")]
 process_mode = 3
@@ -52,14 +57,14 @@ bones/13/rotation = Quaternion(-1.02444e-09, -4.24391e-09, 0.707107, 0.707107)
 bones/13/scale = Vector3(1, 1, 1)
 bones/14/rotation = Quaternion(-5.80608e-11, -0.0313417, -1.88012e-09, 0.999509)
 bones/16/position = Vector3(0.170945, 0.113587, 1.59941e-08)
-bones/16/rotation = Quaternion(0.993715, 0.0837146, 0.0735038, 0.0109185)
+bones/16/rotation = Quaternion(0.996185, 0.0479136, 0.0566427, -0.045939)
 bones/16/scale = Vector3(1, 1, 1)
-bones/17/rotation = Quaternion(0.195602, 6.26228e-08, -1.32239e-07, 0.980683)
+bones/17/rotation = Quaternion(0.165014, 6.49414e-08, -1.11407e-07, 0.986291)
 bones/17/scale = Vector3(1, 1, 1)
-bones/18/rotation = Quaternion(-0.517564, -0.209497, 0.0436549, 0.828452)
+bones/18/rotation = Quaternion(-0.533729, -0.260895, -1.72985e-05, 0.804405)
 bones/18/scale = Vector3(1, 1, 0.999999)
-bones/19/rotation = Quaternion(0.000111784, 0.920258, -0.391313, -2.52417e-05)
-bones/19/scale = Vector3(1, 0.999998, 1)
+bones/19/rotation = Quaternion(0.000263472, 0.920216, -0.391412, -5.96391e-05)
+bones/19/scale = Vector3(1, 0.999997, 1)
 bones/20/position = Vector3(-0.170945, 0.113587, 1.55755e-08)
 bones/20/rotation = Quaternion(0.997322, -0.0294574, 0.0315293, 0.0590483)
 bones/20/scale = Vector3(1, 1, 1)
@@ -70,17 +75,17 @@ bones/22/scale = Vector3(1, 1, 0.999999)
 bones/23/rotation = Quaternion(-8.93489e-05, 0.920222, -0.391398, 2.0291e-05)
 bones/23/scale = Vector3(1, 0.999998, 1)
 bones/24/rotation = Quaternion(0.707107, -2.29302e-07, -4.60552e-08, 0.707107)
-bones/25/position = Vector3(0.202182, 0.0259903, 0.205181)
-bones/25/rotation = Quaternion(-0.707107, -7.05285e-08, -7.05285e-08, 0.707107)
+bones/25/position = Vector3(0.213918, 0.0259903, 0.173866)
+bones/25/rotation = Quaternion(-0.705092, 0.0533355, 0.0533355, 0.705092)
 bones/26/rotation = Quaternion(9.65792e-09, 1.77955e-09, 0.985719, -0.168398)
-bones/27/position = Vector3(-2.60494e-08, 0.213436, -5.1715e-09)
-bones/27/rotation = Quaternion(-1.01273e-07, 0.391084, 0.920355, -3.35091e-08)
+bones/27/position = Vector3(-1.11482e-08, 0.213436, -5.36347e-09)
+bones/27/rotation = Quaternion(-1.10961e-07, 0.391084, 0.920355, -2.67919e-08)
 bones/27/scale = Vector3(1, 1, 1)
-bones/28/position = Vector3(8.58988e-09, 0.16565, -2.40963e-09)
+bones/28/position = Vector3(-6.31128e-09, 0.16565, -7.10267e-09)
 bones/28/scale = Vector3(1, 1, 1)
-bones/29/rotation = Quaternion(1, -2.33136e-09, 1.99777e-07, -1.34211e-15)
+bones/29/rotation = Quaternion(1, -8.27364e-11, 1.94627e-07, -7.45058e-09)
 bones/29/scale = Vector3(1, 1, 1)
-bones/30/rotation = Quaternion(4.16335e-17, -6.74098e-17, -1.94669e-08, 1)
+bones/30/rotation = Quaternion(5.55113e-17, -6.74098e-17, -1.94669e-08, 1)
 bones/31/rotation = Quaternion(0.707107, -3.82385e-08, 1.45009e-07, 0.707107)
 bones/32/rotation = Quaternion(-0.707107, -7.05285e-08, -7.05285e-08, 0.707107)
 bones/33/rotation = Quaternion(-5.83589e-09, 6.43837e-10, 0.994809, 0.101756)
@@ -106,11 +111,15 @@ transform = Transform3D(0.99972, -1.40145e-09, 0.0236468, 1.39343e-09, 1, 3.5568
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 process_mode = 3
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0163155, 1.22026, 0.0207717)
-shape = SubResource("CapsuleShape3D_gt656")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0163155, 0.262167, 0.0207717)
+visible = false
+shape = SubResource("BoxShape3D_wnveu")
+debug_color = Color(0.960784, 0, 0.509804, 0)
+debug_fill = false
 
-[node name="HealthComponent" parent="." instance=ExtResource("4_qojfv")]
+[node name="HealthComponent" parent="." node_paths=PackedStringArray("health_bar") instance=ExtResource("4_qojfv")]
 process_mode = 3
+health_bar = NodePath("../HealthBar3D/SubViewport/HealthBar")
 
 [node name="WeaponComponent" parent="." node_paths=PackedStringArray("AttackOptions") instance=ExtResource("4_7omsi")]
 process_mode = 3
@@ -118,7 +127,19 @@ AttackOptions = [NodePath("BasicShot")]
 
 [node name="BasicShot" type="Node" parent="WeaponComponent"]
 script = ExtResource("5_qojfv")
-attack_range = 200.0
+attack_damage = 5
 metadata/_custom_type_script = "uid://t124njj13ydl"
+
+[node name="HealthBar3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.13424, 0)
+billboard = 1
+texture = SubResource("ViewportTexture_wnveu")
+script = ExtResource("6_wnveu")
+
+[node name="SubViewport" type="SubViewport" parent="HealthBar3D"]
+transparent_bg = true
+size = Vector2i(200, 26)
+
+[node name="HealthBar" parent="HealthBar3D/SubViewport" instance=ExtResource("7_xlx51")]
 
 [editable path="skeleton_mage"]

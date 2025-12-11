@@ -8,34 +8,34 @@
 [ext_resource type="Texture2D" uid="uid://c2w6jmr5wf783" path="res://Assets/icons/maps.png" id="6_6a64n"]
 [ext_resource type="Texture2D" uid="uid://45nexd0caphf" path="res://Assets/icons/arrow.png" id="7_8y20f"]
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ngkpb"]
-atlas = ExtResource("3_6sr5e")
+[sub_resource type="AtlasTexture" id="AtlasTexture_dy3gf"]
 script = ExtResource("2_xe57u")
 name = 0
+texture = ExtResource("3_6sr5e")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ukkcn"]
-atlas = ExtResource("4_safyw")
+[sub_resource type="AtlasTexture" id="AtlasTexture_8k2my"]
 script = ExtResource("2_xe57u")
 name = 1
+texture = ExtResource("5_uo4va")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_rar0w"]
-atlas = ExtResource("5_uo4va")
+[sub_resource type="AtlasTexture" id="AtlasTexture_y3x2m"]
 script = ExtResource("2_xe57u")
 name = 2
+texture = ExtResource("4_safyw")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_qn1fj"]
-atlas = ExtResource("6_6a64n")
+[sub_resource type="AtlasTexture" id="AtlasTexture_iy3hy"]
 script = ExtResource("2_xe57u")
 name = 3
+texture = ExtResource("6_6a64n")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_o27fe"]
-atlas = ExtResource("7_8y20f")
+[sub_resource type="AtlasTexture" id="AtlasTexture_18hx3"]
 script = ExtResource("2_xe57u")
 name = 4
+texture = ExtResource("7_8y20f")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
 [node name="Selection_Wheel" type="Control"]
@@ -51,4 +51,4 @@ script = ExtResource("1_t2uwe")
 bg_color = Color(0.26779, 0.26779, 0.26779, 1)
 line_color = Color(0.463587, 0.463587, 0.463587, 1)
 highlight_color = Color(0.886262, 0.886261, 0.886262, 1)
-options = Array[ExtResource("2_xe57u")]([SubResource("AtlasTexture_ngkpb"), SubResource("AtlasTexture_ukkcn"), SubResource("AtlasTexture_rar0w"), SubResource("AtlasTexture_qn1fj"), SubResource("AtlasTexture_o27fe")])
+options = Array[ExtResource("2_xe57u")]([SubResource("AtlasTexture_dy3gf"), SubResource("AtlasTexture_8k2my"), SubResource("AtlasTexture_y3x2m"), SubResource("AtlasTexture_iy3hy"), SubResource("AtlasTexture_18hx3")])

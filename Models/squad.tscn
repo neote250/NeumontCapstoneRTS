@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://1cmfjqxuuyw1"]
+[gd_scene load_steps=12 format=3 uid="uid://1cmfjqxuuyw1"]
 
 [ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
 [ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
@@ -8,49 +8,62 @@
 [ext_resource type="Script" uid="uid://cljp2x5idqm8l" path="res://Models/march_state.gd" id="6_l1b2l"]
 [ext_resource type="Script" uid="uid://cvoj802dacdnp" path="res://Models/warpath_state.gd" id="7_2vagg"]
 [ext_resource type="Script" uid="uid://bbspmxw2afix2" path="res://Models/skirmish_state.gd" id="8_8138w"]
+[ext_resource type="Script" uid="uid://5u7duran23mt" path="res://Models/build_state.gd" id="9_6tmdr"]
+[ext_resource type="PackedScene" uid="uid://6igk31dktu27" path="res://build.tscn" id="9_brepm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
-size = Vector3(7.21875, 2.5, 4.48047)
+size = Vector3(7.219, 2.8, 4.48)
 
-[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("all_units", "state_machine")]
+[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("buy_unit_upgrade", "state_machine", "default_state")]
 process_mode = 3
 collision_layer = 4
 collision_mask = 6
 script = ExtResource("1_xp1uv")
-all_units = [NodePath("Unit"), NodePath("Unit2"), NodePath("Unit3")]
+speed = 200
+buy_unit_upgrade = NodePath("buy_unit_build")
 state_machine = NodePath("StateMachine")
+default_state = NodePath("StateMachine/ReadyState")
 
 [node name="CameraMount" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.840387, 0.541987, 0, -0.541987, 0.840387, 0.339889, 4.66579, 6.25614)
+transform = Transform3D(-1, 8.74228e-08, 0, 7.57103e-08, 0.866026, 0.5, 4.37114e-08, 0.5, -0.866026, 0.339889, 4.66579, 6.25614)
+
+[node name="Unit1Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0648593, 0)
+
+[node name="Unit2Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.14515, 0.0648593, 0.980836)
+
+[node name="Unit3Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.09136, 0.0648593, 0.980836)
+
+[node name="Unit4Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5809, 0.0648593, 2.70805)
+
+[node name="Unit5Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.89916, 0.0648593, 2.70805)
 
 [node name="Unit" parent="." instance=ExtResource("1_gqsy5")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 
-[node name="Unit2" parent="." instance=ExtResource("1_gqsy5")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.22089, 0, 1.19578)
-
-[node name="Unit3" parent="." instance=ExtResource("1_gqsy5")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.52071, 0, 1.10179)
-
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 debug_enabled = true
 debug_path_custom_color = Color(1, 0, 1, 1)
-debug_path_custom_point_size = 17.99
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35225, 1.30846)
+visible = false
 shape = SubResource("BoxShape3D_04802")
-debug_color = Color(0.916016, 7.56615e-05, 0.710749, 0.42)
+debug_color = Color(0.917647, 0, 0.709804, 0)
+debug_fill = false
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("starting_state", "states")]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("states")]
 script = ExtResource("3_5tp08")
-starting_state = NodePath("ReadyState")
 states = {
 0: NodePath("ReadyState"),
 1: NodePath("WarpathState"),
 2: NodePath("TargetState"),
 3: NodePath("MarchState"),
-4: NodePath("SkirmishState")
+4: NodePath("BuildState")
 }
 
 [node name="ReadyState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
@@ -72,3 +85,12 @@ parent = NodePath("../..")
 [node name="SkirmishState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
 script = ExtResource("8_8138w")
 parent = NodePath("../..")
+
+[node name="BuildState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("9_6tmdr")
+parent = NodePath("../..")
+
+[node name="buy_unit_build" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("9_brepm")]
+parent = NodePath("..")
+duration = 5.0
+repeatable = true

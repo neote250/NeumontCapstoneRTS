@@ -1,0 +1,52 @@
+[gd_scene load_steps=7 format=3 uid="uid://b0we7877sme11"]
+
+[ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="1_j2l47"]
+[ext_resource type="Script" uid="uid://b5idbjyaev8f1" path="res://UI/build_progress.gd" id="1_smxp7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0cu8v"]
+bg_color = Color(0.143589, 0.38498, 0, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0cu8v"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_smxp7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_smxp7"]
+bg_color = Color(0, 0.481781, 0.0595617, 1)
+
+[node name="BuildProgress" type="Control"]
+layout_mode = 3
+anchor_right = 1.004
+anchor_bottom = 0.619
+offset_right = 0.391968
+offset_bottom = -0.112
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_smxp7")
+
+[node name="Button" type="Button" parent="."]
+z_index = 1
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -3.0
+offset_bottom = -3.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 20
+theme_override_styles/hover = SubResource("StyleBoxFlat_0cu8v")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxEmpty_0cu8v")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_smxp7")
+theme_override_styles/normal = SubResource("StyleBoxFlat_smxp7")
+toggle_mode = true
+text = "Buy a new Squad"
+
+[node name="HealthBar" parent="." instance=ExtResource("1_j2l47")]
+z_index = -1
+layout_mode = 1
+anchors_preset = 15
+anchor_top = 0.0
+anchor_bottom = 1.0
+offset_top = 0.0
+offset_bottom = 0.0
+mouse_filter = 2

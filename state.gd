@@ -8,6 +8,9 @@ class_name State
 
 #
 #signal Transitioned
+func _ready() -> void:
+	if !parent:
+		parent = get_parent().get_parent()
 
 ###Setup when entering the state
 func Enter() -> void:

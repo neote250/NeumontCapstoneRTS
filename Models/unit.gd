@@ -2,11 +2,10 @@ extends CharacterBody3D
 class_name Unit
 
 
-
 #info given to units
 var target_position: Vector3
 var can_move: bool = true
-var has_target_position = true
+var has_target_position: bool = true   ###
 var is_moving: bool = false
 var is_attacking: bool = false
 
@@ -17,25 +16,41 @@ var is_attacking: bool = false
 @export var weapon_component : WeaponComponent
 @export var default_attack: Attack
 
+func _ready() -> void:
+	if !health_component:
+		for child: Node in get_children():
+			if child is HealthComponent:
+				health_component = child
+	if !weapon_component:
+		for child: Node in get_children():
+			if child is WeaponComponent:
+				weapon_component = child
+	if !default_attack:
+		for child: Node in get_children(true):
+			if child is Attack:
+				default_attack = child
+
+
 #this is the only thing the unit does, consider a way to reduce amount of constant processes
 func _physics_process(delta: float) -> void:
-	if not is_on_floor():
-		velocity += get_gravity() * delta
-		move_and_slide()
-		return
-
-func _process(delta: float) -> void:
-	# Add the gravity.
-
-	
-	#if can_move and has_target_position:
-		## Apply desired movement to velocity
-		#var direction = (target_position - global_position).normalized()
-	#else:
-		#velocity.x = 0
-		#velocity.y = 0
-	
-
-	
-	#move_and_slide()
+	#if not is_on_floor():
+		#velocity += get_gravity() * delta
+		#move_and_slide()
+		#return
 	pass
+
+#func _process(delta: float) -> void:
+	## Add the gravity.
+#
+	#
+	##if can_move and has_target_position:
+		### Apply desired movement to velocity
+		##var direction = (target_position - global_position).normalized()
+	##else:
+		##velocity.x = 0
+		##velocity.y = 0
+	#
+#
+	#
+	##move_and_slide()
+	#pass

@@ -16,28 +16,37 @@ var current_squad_index: int = 0
 var current_squad: Squad = null
 var last_squad_index: int = -1
 
-#Reference to UI
-#Don't have a squadinfopanel yet. need to make one
-#@onready var ui_manager = $"../UI/SquadInfoPanel"
 
 #Camera stuff
 @onready var camera: Camera3D = $Camera3D
-@onready var current_camera_mount: Node3D = $StartingSquad.get_camera_mount()
+@onready var current_camera_mount: Node3D = $BuildingSquad.get_camera_mount()
 @onready var minimap: SubViewport= $MinimapContainer/SubViewportContainer/Minimap
 @onready var minimap_camera: Camera3D = $MinimapContainer/SubViewportContainer/Minimap/Camera3D
 
 var map_coordinates: Vector2 = Vector2(256.0, 256.0)
 
 
+var memory_shards: float = 50.0
+
+
 #ui stuff
 @onready var ui: Player_UI = $UI
-@export var move_marker: Resource
+@onready var move_marker: Sprite3D = $MinimapContainer/SubViewportContainer/Minimap/MoveMarker
+
+var all_progress_bars:Dictionary[Squad, BuildProgress]
+
+
+
 
 func _ready() -> void:
 	#Squad setup
-	if all_squads.size() > 0:
-		set_active_squad(0)
+	if all_squads.is_empty():
+		var child_nodes:Array[Node] = get_children()
+		for node:Node in child_nodes:
+			if node is Squad:
+				all_squads.append(node)
 	
+	set_active_squad(0)
 	
 	#Camera setup
 	$"../NavigationRegion3D/Terrain3D".set_camera(camera)
@@ -46,105 +55,128 @@ func _ready() -> void:
 	
 	#Signal setup
 	ui.Change_State.connect(Player_State_Input)
+	
+	###connect to each squad's target marker and signals.
+	for _squad:Squad in all_squads:
+		connect_signals(_squad)
+
+func connect_signals(_squad:Squad)->void:
+	_squad.Controller_Add_Squad.connect(Build_Squad)
+	#_squad.RTS_Controller_Check_Progress.connect(add_squad)
 
 
 
-
-
-func _input(event):
+func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("next_squad"):  # Tab key or SWIPE_RIGHT
 		cycle_next_squad()
 	elif event.is_action_pressed("previous_squad"):  # Shift+Tab or SWIPE_LEFT
 		cycle_previous_squad()
 	
 	
-	#elif event.is_action_pressed("quick_swap"):  # Q key - swap between last two squads
-		#quick_swap()
-	## Direct squad selection with number keys
-	#for i in range(1, 10):
-		#if event.is_action_pressed("select_squad_" + str(i)):
-			#if i - 1 < all_units.size():
-				#set_active_unit(i - 1)
-	
-	
+	# Command to buy unit for current squad
+	if event.is_action_pressed("buy_unit"):
+		current_squad.buy_unit()
 	
 	
 	# Commands for current squad
-	if event.is_action_pressed("target_command") and current_squad:  # currently left click eventually TOUCH
+	if event.is_action_pressed("target_command"):  # currently left click eventually TOUCH		and current_squad
 		player_click_on_map()
-	elif event.is_action_pressed("stop_command") and current_squad:  # ... or ... 
+	elif event.is_action_pressed("stop_command"):  # ... or ... 
 		current_squad.stop_movement()
 
 
-func Player_State_Input(new_state: GlobalEnums.STATES):
+func Player_State_Input(new_state: GlobalEnums.STATES) -> void:
 	current_squad.state_machine.change_state(current_squad.state_machine.states[new_state])
 
-func cycle_next_squad():
+func add_squad(which_squad:Squad, _progress:float, _cost:float, _multiplier:float)->void:
+	if memory_shards >= _cost:
+		memory_shards -= _cost
+		which_squad.progress_build(_progress, _multiplier)
+	else:
+		return
+
+func Build_Squad(where_to_place:Vector3, bought_squad:PackedScene) -> void:
+	var new_squad:Squad = bought_squad.instantiate()
+	add_child(new_squad)
+	
+	##Position in world
+	new_squad.global_position = Vector3(
+		#unit_spots[all_units.size()].global_position.x, 
+		#all_units[0].global_position.y, 
+		#unit_spots[all_units.size()].global_position.z
+		where_to_place.x,
+		where_to_place.y,
+		where_to_place.z-10
+		)
+	#new_squad.global_rotation = all_units[0].global_rotation
+	
+	
+	###Connect to any squad -> controller signals
+	connect_signals(new_squad)
+	
+	all_squads.append(new_squad)
+	
+
+
+
+
+
+func cycle_next_squad() -> void:
 	if all_squads.size() <= 1:
 		return
 	
-	var next_index = (current_squad_index + 1) % all_squads.size()
+	#ui.clear_prev_squad()
+	
+	var next_index:int = (current_squad_index + 1) % all_squads.size()
 	set_active_squad(next_index)
 
-func cycle_previous_squad():
+func cycle_previous_squad() -> void:
 	if all_squads.size() <= 1:
 		return
 	
-	var prev_index = current_squad_index - 1
+	#ui.clear_prev_squad()
+	
+	var prev_index: int = current_squad_index - 1
 	if prev_index < 0:
 		prev_index = all_squads.size() - 1
 	set_active_squad(prev_index)
 
 
-
-#func quick_swap():
-	#if last_squad_index >= 0 and last_squad_index < all_squads.size():
-		#set_active_squad(last_squad_index)
-
-func set_active_squad(index: int):
-	#check to see if something went wrong, prob not needed, but check for now
-	if index >= all_squads.size():
-		return
-	
-	## Store last squad for quick swap
-	#if current_squad:
-		#last_squad_index = current_squad_index
-		#current_squad.deactivate()
-	
+func set_active_squad(index: int) -> void:
 	# Set new active squad
 	current_squad_index = index
 	current_squad = all_squads[index]
-	#current_squad.activate()
-	
 	
 	# Update camera to follow new squad
 	current_camera_mount = current_squad.camera_mount
 	update_camera_target()
 	
+	#Update UI
+	ui.update_player_unit_details(current_squad)
 	
 	# Emit signal for UI updates
 	swap_squad.emit(current_squad_index)
 
 ###Option for player to increase minimap size on LONG press or SHIFT
-func increase_minimap_scale():
+func increase_minimap_scale() -> void:
 	pass
 
 
 ###Handle result of a mouse click on map
-func player_click_on_map():
-	var mouse_pos = minimap.get_mouse_position() #get the mouse position based on the subviewport
+func player_click_on_map() -> void:
+	var mouse_pos: Vector2 = minimap.get_mouse_position() #get the mouse position based on the subviewport
 	
 	#Create the vector
-	var from = minimap_camera.project_ray_origin(mouse_pos)
-	var to = from + minimap_camera.project_ray_normal(mouse_pos) * 1000
+	var from: Vector3 = minimap_camera.project_ray_origin(mouse_pos)
+	var to: Vector3 = from + minimap_camera.project_ray_normal(mouse_pos) * 1000
 	#Setup data
-	var space_state = minimap_camera.get_world_3d().direct_space_state
-	var land_hit_query = PhysicsRayQueryParameters3D.create(from, to, 2)
-	var squad_hit_query = PhysicsRayQueryParameters3D.create(from, to, 3)
+	var space_state:PhysicsDirectSpaceState3D = minimap_camera.get_world_3d().direct_space_state
+	var land_hit_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to, 2)
+	#var squad_hit_query = PhysicsRayQueryParameters3D.create(from, to, 3)
 	
 	
 	#Get results
-	var result = space_state.intersect_ray(land_hit_query)
+	var result: Dictionary = space_state.intersect_ray(land_hit_query)
 	
 	#Check if result is a squad otherwise it is a position (or not a result)
 	
@@ -155,10 +187,10 @@ func player_click_on_map():
 	else: return
 	
 	# Add visual feedback at target position
-	spawn_move_marker(result.position)
+	enable_move_marker(result.position)
 
 ###Handle result of a finger press on map
-func player_press_on_map():
+func player_press_on_map() -> void:
 	pass
 
 
@@ -170,19 +202,21 @@ func player_press_on_map():
 
 
 ### This is for instant swap of camera position.
-func update_camera_target():
+func update_camera_target() -> void:
 	if camera:
 		camera.global_position = current_camera_mount.global_position
+		camera.rotation = current_camera_mount.rotation
 
 
 ### Visual feedback for move command
-func spawn_move_marker(position: Vector3):
+func enable_move_marker(position: Vector3) -> void:
 	#var marker = move_marker.instantiate()
-	
 	#get_tree().current_scene.add_child(marker)
-	#marker.global_position = position
+	
+	move_marker.global_position = position
+	move_marker.visible = true
 	#marker.play_animation()  # Fade out over time
-	pass
+	
 
 
 
@@ -191,8 +225,11 @@ func spawn_move_marker(position: Vector3):
 
 
 func _process(delta: float) -> void:
+	if !current_squad:
+		cycle_next_squad()
+	
 	#keep following the current squad's camera mount
 	camera.position = camera.position.lerp(current_camera_mount.global_position, 5.0 * delta)
 	#update rotation as well
-	camera.rotation.x = current_squad.rotation.x
-	camera.rotation.y = current_squad.rotation.y
+	camera.rotation = current_squad.rotation
+	

@@ -6,19 +6,11 @@ func Enter() -> void:
 	#That way there doesn't need to be multiple references
 	
 	#temp until can click enemy units
-	parent.has_target = true
+	#parent.has_target = true
 
 func Exit() -> void:
 	
 	pass
-
-###For the selected unit, use the current attack and do the associated animations
-func fire_weapon(weapon_component:WeaponComponent, delta:float) -> void:
-	weapon_component.damage_target(delta)
-	#and call the connected animation
-	
-	return
-
 
 
 
@@ -31,10 +23,18 @@ func State_Update(_delta: float) -> State:
 ###fire each weapon if within range, else move closer to target
 func State_Physics_Update(_delta: float) -> State:
 	#need to do the other half of if target_squad is dead, signal to attacking squad that it has no target anymore
-	if !parent.has_target:
-		return parent.state_machine.states[GlobalEnums.STATES.READY]
+	if !parent.target_squad:# or !parent.has_target:
+		return parent.state_machine.states[GlobalEnums.STATES.CENTER]
+	#if !parent.has_target:
+		#return parent.state_machine.states[GlobalEnums.STATES.READY]
 	
-	for unit: Unit in parent.all_units:
-		fire_weapon(unit.weapon_component, _delta)
+	parent.set_target_position(parent.target_squad.global_position) 
+	#var _distance = parent.check_range()
+	#if parent.all_units[0].weapon_component.CurrentAttack.attack_range < _distance:
+	if !parent.check_range():
+		parent.move_to(_delta)
+	else:
+		for unit: Unit in parent.all_units:
+			parent.fire_weapon(unit.weapon_component, _delta)
 	
 	return null

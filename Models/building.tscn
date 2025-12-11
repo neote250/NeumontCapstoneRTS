@@ -1,0 +1,56 @@
+[gd_scene load_steps=10 format=3 uid="uid://b22aixrgx2s1n"]
+
+[ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_7xksg"]
+[ext_resource type="PackedScene" uid="uid://bp62oq2f62qtf" path="res://Models/Buildings/grave_04.fbx" id="2_7xksg"]
+[ext_resource type="PackedScene" uid="uid://dn65m18cm8q5q" path="res://Models/Components/health_component.tscn" id="3_u1h07"]
+[ext_resource type="PackedScene" uid="uid://bva8v7auq3pek" path="res://Models/Components/weapon_component.tscn" id="4_1eq68"]
+[ext_resource type="Script" uid="uid://t124njj13ydl" path="res://Models/Components/Attack.gd" id="5_7obdf"]
+[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://Models/health_bar_3d.gd" id="6_prxap"]
+[ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="7_7371p"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wnveu"]
+size = Vector3(1.2, 0.624, 1.2)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_wnveu"]
+viewport_path = NodePath("HealthBar3D/SubViewport")
+
+[node name="Building" type="CharacterBody3D" node_paths=PackedStringArray("health_component", "weapon_component", "default_attack")]
+process_mode = 3
+collision_mask = 2
+script = ExtResource("1_7xksg")
+health_component = NodePath("HealthComponent")
+weapon_component = NodePath("WeaponComponent")
+default_attack = NodePath("WeaponComponent/BasicShot")
+
+[node name="grave_04" parent="." instance=ExtResource("2_7xksg")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+process_mode = 3
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0163155, 0.262167, 0.0207717)
+shape = SubResource("BoxShape3D_wnveu")
+debug_color = Color(0.960784, 0, 0.509804, 1)
+
+[node name="HealthComponent" parent="." node_paths=PackedStringArray("health_bar") instance=ExtResource("3_u1h07")]
+process_mode = 3
+Max_Health = 1000
+health_bar = NodePath("../HealthBar3D/SubViewport/HealthBar")
+
+[node name="WeaponComponent" parent="." node_paths=PackedStringArray("AttackOptions") instance=ExtResource("4_1eq68")]
+process_mode = 3
+AttackOptions = [NodePath("BasicShot")]
+
+[node name="BasicShot" type="Node" parent="WeaponComponent"]
+script = ExtResource("5_7obdf")
+metadata/_custom_type_script = "uid://t124njj13ydl"
+
+[node name="HealthBar3D" type="Sprite3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.76335, 0)
+billboard = 1
+texture = SubResource("ViewportTexture_wnveu")
+script = ExtResource("6_prxap")
+
+[node name="SubViewport" type="SubViewport" parent="HealthBar3D"]
+transparent_bg = true
+size = Vector2i(200, 26)
+
+[node name="HealthBar" parent="HealthBar3D/SubViewport" instance=ExtResource("7_7371p")]

@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bve0fqe41rqsl"]
+
+[ext_resource type="Texture2D" uid="uid://bce7xm14baxpv" path="res://Models/concentric_green.png" id="1_8l5e3"]
+
+[node name="MoveMarker" type="Sprite3D"]
+layers = 4
+billboard = 1
+texture = ExtResource("1_8l5e3")

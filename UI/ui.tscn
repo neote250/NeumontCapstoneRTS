@@ -1,18 +1,21 @@
-[gd_scene load_steps=4 format=3 uid="uid://cg2r12q47xhbd"]
+[gd_scene load_steps=5 format=3 uid="uid://cg2r12q47xhbd"]
 
 [ext_resource type="Script" uid="uid://b10p31b0fp600" path="res://UI/ui.gd" id="1_2fwl4"]
 [ext_resource type="PackedScene" uid="uid://g8yosfq1j87r" path="res://UI/selection_wheel.tscn" id="2_dajm1"]
+[ext_resource type="PackedScene" uid="uid://b0we7877sme11" path="res://UI/build_progress.tscn" id="3_e6gg6"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dajm1"]
 
-[node name="UI" type="Control"]
+[node name="UI" type="Control" node_paths=PackedStringArray("display_builds_progress")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 1
 script = ExtResource("1_2fwl4")
+display_builds_progress = [NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit1/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit2/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit3/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit4/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit5/BuildProgress")]
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -20,6 +23,7 @@ script = ExtResource("1_2fwl4")
 visible = false
 
 [node name="TestingDataLabel" type="Label" parent="CanvasLayer"]
+visible = false
 offset_left = 256.0
 offset_right = 658.0
 offset_bottom = 45.0
@@ -41,29 +45,50 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="SquadActive" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Resources" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="MemoryShards" type="Label" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Resources"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme_override_font_sizes/font_size = 30
 
 [node name="Unit1" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit1" instance=ExtResource("3_e6gg6")]
+layout_mode = 1
+
 [node name="Unit2" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit2" instance=ExtResource("3_e6gg6")]
+layout_mode = 1
 
 [node name="Unit3" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit3" instance=ExtResource("3_e6gg6")]
+layout_mode = 1
+
 [node name="Unit4" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
 
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit4" instance=ExtResource("3_e6gg6")]
+layout_mode = 1
+
 [node name="Unit5" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit5" instance=ExtResource("3_e6gg6")]
+layout_mode = 1
 
 [node name="SquadInfo" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
 layout_mode = 2

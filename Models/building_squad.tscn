@@ -1,0 +1,110 @@
+[gd_scene load_steps=12 format=3 uid="uid://dcvmxyy8vpldk"]
+
+[ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_f5d1k"]
+[ext_resource type="PackedScene" uid="uid://b22aixrgx2s1n" path="res://Models/building.tscn" id="2_f5d1k"]
+[ext_resource type="Script" uid="uid://dunqtset5we8u" path="res://Models/state_machine.gd" id="3_jwlxe"]
+[ext_resource type="Script" uid="uid://ci2tikap17h05" path="res://ready_state.gd" id="4_8y6sj"]
+[ext_resource type="Script" uid="uid://dighru1x7wkrs" path="res://Models/turret_state.gd" id="5_f5d1k"]
+[ext_resource type="Script" uid="uid://b0si4sqwyym45" path="res://Models/overcharge_state.gd" id="6_ka4oq"]
+[ext_resource type="Script" uid="uid://b071ccnk5prdv" path="res://Models/store_state.gd" id="7_om28s"]
+[ext_resource type="PackedScene" uid="uid://6igk31dktu27" path="res://build.tscn" id="9_jwlxe"]
+[ext_resource type="Script" uid="uid://5u7duran23mt" path="res://Models/build_state.gd" id="9_om28s"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_om28s"]
+viewport_path = NodePath("HealthBar3D/SubViewport")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
+size = Vector3(7.219, 2.8, 4.48)
+
+[node name="BuildingSquad" type="CharacterBody3D" node_paths=PackedStringArray("state_machine", "default_state")]
+process_mode = 3
+collision_layer = 4
+collision_mask = 6
+script = ExtResource("1_f5d1k")
+speed = 5
+unit_type = ExtResource("2_f5d1k")
+spawning_size = 1
+unit_cost = 50
+squad_type = 1
+state_machine = NodePath("StateMachine")
+default_state = NodePath("StateMachine/ReadyState")
+
+[node name="CameraMount" type="Node3D" parent="."]
+transform = Transform3D(1, -1.17124e-08, -4.37114e-08, 4.37114e-08, 0.5, 0.866026, 1.17124e-08, -0.866026, 0.5, 0, 5, 5)
+
+[node name="Unit1Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0648593, 0)
+
+[node name="Unit2Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.14515, 0.0648593, 0.980836)
+
+[node name="Unit3Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.09136, 0.0648593, 0.980836)
+
+[node name="Unit4Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5809, 0.0648593, 2.70805)
+
+[node name="Unit5Spot" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.89916, 0.0648593, 2.70805)
+
+[node name="Building" parent="." instance=ExtResource("2_f5d1k")]
+
+[node name="BasicShot" parent="Building/WeaponComponent" index="0"]
+attack_damage = 0
+
+[node name="HealthBar3D" parent="Building" index="4"]
+texture = SubResource("ViewportTexture_om28s")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+debug_enabled = true
+debug_path_custom_color = Color(1, 0, 1, 1)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35225, 1.30846)
+visible = false
+shape = SubResource("BoxShape3D_04802")
+debug_color = Color(0.917647, 0, 0.709804, 0)
+debug_fill = false
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("states")]
+script = ExtResource("3_jwlxe")
+states = {
+0: NodePath("ReadyState"),
+1: NodePath("TurretState"),
+2: NodePath("BuildState"),
+3: NodePath("StoreState"),
+4: NodePath("OverchargeState")
+}
+
+[node name="ReadyState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("4_8y6sj")
+move_speed = 0.0
+parent = NodePath("../..")
+
+[node name="TurretState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("5_f5d1k")
+move_speed = 0.0
+parent = NodePath("../..")
+
+[node name="BuildState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("9_om28s")
+move_speed = 0.0
+parent = NodePath("../..")
+
+[node name="StoreState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("7_om28s")
+move_speed = 0.0
+parent = NodePath("../..")
+
+[node name="OverchargeState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+script = ExtResource("6_ka4oq")
+move_speed = 0.0
+parent = NodePath("../..")
+
+[node name="BuySquadBuild" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("9_jwlxe")]
+parent = NodePath("..")
+type_of_upgrade = 1
+duration = 10.0
+cost = 5
+
+[editable path="Building"]
