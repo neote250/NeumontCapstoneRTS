@@ -17,10 +17,17 @@ const SPRITE_SIZE: Vector2 = Vector2(32,32)
 
 var selection: int = 0
 
-func Close() -> GlobalEnums.STATES:
+
+
+func open() -> void:
+	show()
+	set_process(true)
+
+
+func close() -> GlobalEnums.WHEEL_SLOT:
 	hide()
-	
-	return options[selection].name
+	set_process(false)
+	return options[selection].slot
 
 
 func _draw() -> void:
@@ -80,7 +87,7 @@ func _draw() -> void:
 				)
 	
 	
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	var mouse_position: Vector2 = get_local_mouse_position()
 	var mouse_radius: float = mouse_position.length()
 	

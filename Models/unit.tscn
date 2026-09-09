@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://blo06fum3fqma"]
+[gd_scene format=3 uid="uid://blo06fum3fqma"]
 
 [ext_resource type="PackedScene" uid="uid://cpppiqty1a1pu" path="res://Assets/Models/skeleton_mage.glb" id="1_gt656"]
 [ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_vgabi"]
@@ -8,22 +8,19 @@
 [ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://Models/health_bar_3d.gd" id="6_wnveu"]
 [ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="7_xlx51"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wnveu"]
-size = Vector3(1, 0.623901, 1)
-
 [sub_resource type="ViewportTexture" id="ViewportTexture_wnveu"]
 viewport_path = NodePath("HealthBar3D/SubViewport")
 
-[node name="Unit" type="CharacterBody3D" node_paths=PackedStringArray("health_component", "weapon_component", "default_attack")]
+[node name="Unit" type="Node3D" unique_id=1026092460 node_paths=PackedStringArray("health_component", "weapon_component", "default_attack")]
 process_mode = 3
-collision_mask = 2
 script = ExtResource("1_vgabi")
 health_component = NodePath("HealthComponent")
 weapon_component = NodePath("WeaponComponent")
 default_attack = NodePath("WeaponComponent/BasicShot")
 
-[node name="skeleton_mage" parent="." instance=ExtResource("1_gt656")]
+[node name="skeleton_mage" parent="." unique_id=1808285292 instance=ExtResource("1_gt656")]
 process_mode = 3
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Skeleton3D" parent="skeleton_mage/Rig" index="0"]
 bones/1/position = Vector3(0, 0.392064, 0)
@@ -107,39 +104,31 @@ bones/41/position = Vector3(-0.510844, 0.788312, 0.0597369)
 bones/41/rotation = Quaternion(-0.758253, -1.52737e-07, 0.651961, -1.11759e-08)
 
 [node name="Skeleton_Mage_Hat" parent="skeleton_mage/Rig/Skeleton3D" index="0"]
-transform = Transform3D(0.99972, -1.40145e-09, 0.0236468, 1.39343e-09, 1, 3.55687e-10, -0.0236468, -3.22638e-10, 0.99972, 0.000286014, 1.7705, -6.90152e-06)
+transform = Transform3D(0.9997204, -1.4014482e-09, 0.023646828, 1.3934272e-09, 1, 3.5568748e-10, -0.023646828, -3.226379e-10, 0.9997204, 0.00028601402, 1.7705002, -6.901522e-06)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-process_mode = 3
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0163155, 0.262167, 0.0207717)
-visible = false
-shape = SubResource("BoxShape3D_wnveu")
-debug_color = Color(0.960784, 0, 0.509804, 0)
-debug_fill = false
-
-[node name="HealthComponent" parent="." node_paths=PackedStringArray("health_bar") instance=ExtResource("4_qojfv")]
+[node name="HealthComponent" parent="." unique_id=1958742391 node_paths=PackedStringArray("health_bar") instance=ExtResource("4_qojfv")]
 process_mode = 3
 health_bar = NodePath("../HealthBar3D/SubViewport/HealthBar")
 
-[node name="WeaponComponent" parent="." node_paths=PackedStringArray("AttackOptions") instance=ExtResource("4_7omsi")]
+[node name="WeaponComponent" parent="." unique_id=1146619911 node_paths=PackedStringArray("attack_options") instance=ExtResource("4_7omsi")]
 process_mode = 3
-AttackOptions = [NodePath("BasicShot")]
+attack_options = [NodePath("BasicShot")]
 
-[node name="BasicShot" type="Node" parent="WeaponComponent"]
+[node name="BasicShot" type="Node" parent="WeaponComponent" unique_id=2069569214]
 script = ExtResource("5_qojfv")
 attack_damage = 5
 metadata/_custom_type_script = "uid://t124njj13ydl"
 
-[node name="HealthBar3D" type="Sprite3D" parent="."]
+[node name="HealthBar3D" type="Sprite3D" parent="." unique_id=74039072]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.13424, 0)
 billboard = 1
 texture = SubResource("ViewportTexture_wnveu")
 script = ExtResource("6_wnveu")
 
-[node name="SubViewport" type="SubViewport" parent="HealthBar3D"]
+[node name="SubViewport" type="SubViewport" parent="HealthBar3D" unique_id=76584354]
 transparent_bg = true
 size = Vector2i(200, 26)
 
-[node name="HealthBar" parent="HealthBar3D/SubViewport" instance=ExtResource("7_xlx51")]
+[node name="HealthBar" parent="HealthBar3D/SubViewport" unique_id=1272450622 instance=ExtResource("7_xlx51")]
 
 [editable path="skeleton_mage"]

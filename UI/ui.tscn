@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cg2r12q47xhbd"]
+[gd_scene format=3 uid="uid://cg2r12q47xhbd"]
 
 [ext_resource type="Script" uid="uid://b10p31b0fp600" path="res://UI/ui.gd" id="1_2fwl4"]
 [ext_resource type="PackedScene" uid="uid://g8yosfq1j87r" path="res://UI/selection_wheel.tscn" id="2_dajm1"]
@@ -6,7 +6,7 @@
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dajm1"]
 
-[node name="UI" type="Control" node_paths=PackedStringArray("display_builds_progress")]
+[node name="UI" type="Control" unique_id=2052029974 node_paths=PackedStringArray("display_builds_progress")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -17,12 +17,12 @@ mouse_filter = 1
 script = ExtResource("1_2fwl4")
 display_builds_progress = [NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit1/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit2/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit3/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit4/BuildProgress"), NodePath("CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit5/BuildProgress")]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1068305965]
 
-[node name="Selection_Wheel" parent="CanvasLayer" instance=ExtResource("2_dajm1")]
+[node name="Selection_Wheel" parent="CanvasLayer" unique_id=114514542 instance=ExtResource("2_dajm1")]
 visible = false
 
-[node name="TestingDataLabel" type="Label" parent="CanvasLayer"]
+[node name="TestingDataLabel" type="Label" parent="CanvasLayer" unique_id=931633895]
 visible = false
 offset_left = 256.0
 offset_right = 658.0
@@ -30,14 +30,14 @@ offset_bottom = 45.0
 theme_override_font_sizes/font_size = 32
 text = "DEBUG DATA"
 
-[node name="SquadInfoPanel" type="Panel" parent="CanvasLayer"]
+[node name="SquadInfoPanel" type="Panel" parent="CanvasLayer" unique_id=2062448341]
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 200.0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_dajm1")
 
-[node name="SquadInfoBox" type="VBoxContainer" parent="CanvasLayer/SquadInfoPanel"]
+[node name="SquadInfoBox" type="VBoxContainer" parent="CanvasLayer/SquadInfoPanel" unique_id=235523351]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,51 +45,61 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Resources" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Resources" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=1203678170]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="MemoryShards" type="Label" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Resources"]
+[node name="MemoryShards" type="Label" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Resources" unique_id=929030647]
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 theme_override_font_sizes/font_size = 30
 
-[node name="Unit1" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Unit1" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=1550570642]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit1" instance=ExtResource("3_e6gg6")]
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit1" unique_id=1577217002 instance=ExtResource("3_e6gg6")]
 layout_mode = 1
 
-[node name="Unit2" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Unit2" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=975654077]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit2" instance=ExtResource("3_e6gg6")]
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit2" unique_id=288263419 instance=ExtResource("3_e6gg6")]
 layout_mode = 1
 
-[node name="Unit3" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Unit3" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=309965420]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit3" instance=ExtResource("3_e6gg6")]
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit3" unique_id=187070554 instance=ExtResource("3_e6gg6")]
 layout_mode = 1
 
-[node name="Unit4" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Unit4" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=368698463]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit4" instance=ExtResource("3_e6gg6")]
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit4" unique_id=112779871 instance=ExtResource("3_e6gg6")]
 layout_mode = 1
 
-[node name="Unit5" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="Unit5" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=1795302907]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit5" instance=ExtResource("3_e6gg6")]
+[node name="BuildProgress" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox/Unit5" unique_id=1088098027 instance=ExtResource("3_e6gg6")]
 layout_mode = 1
 
-[node name="SquadInfo" type="Control" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox"]
+[node name="SquadInfo" type="VBoxContainer" parent="CanvasLayer/SquadInfoPanel/SquadInfoBox" unique_id=406726225]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="ToastLabel" type="Label" parent="CanvasLayer" unique_id=1604206162]
+visible = false
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="ToastTimer" type="Timer" parent="." unique_id=168865157]
+wait_time = 2.0
+one_shot = true

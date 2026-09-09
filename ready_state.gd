@@ -1,20 +1,11 @@
 extends State
 
 
-func Enter() -> void:
+func enter() -> void:
 	super()
 
-func Exit() -> void:
-	pass
 
-func State_Input(event:InputEvent) -> State:
-	return null
-
-func State_Update(_delta: float) -> State:
-	return null
-
-
-func State_Physics_Update(_delta: float) -> State:
+func state_physics_update(_delta: float) -> State:
 	var closest_squad:Squad = parent.closest_squad_in_range()
 	if closest_squad:
 		parent.set_target(closest_squad)

@@ -3,9 +3,8 @@ class_name RTSController
 
 #signals
 	#tells game manager that current squad controlled has changed (game manager tells ui)
-signal swap_squad(squad_index: int)
+signal swap_squad(new_squad: Squad)
 	#tells game manager that something about the current squad details have changed
-signal squad_changed(squad_index: int)
 	#tells UI that total squads have changed
 signal added_squad(new_squad: Squad, squad_index: int, total_squads: int)
 signal removed_squad(removed_squad: Squad, squad_index: int, total_squads: int)
@@ -19,24 +18,31 @@ var last_squad_index: int = -1
 
 #Camera stuff
 @onready var camera: Camera3D = $Camera3D
-@onready var current_camera_mount: Node3D = $BuildingSquad.get_camera_mount()
+@onready var current_camera_mount: Node3D 
+#= $BuildingSquad.get_camera_mount()
 @onready var minimap: SubViewport= $MinimapContainer/SubViewportContainer/Minimap
 @onready var minimap_camera: Camera3D = $MinimapContainer/SubViewportContainer/Minimap/Camera3D
+var _snap_next_frame: bool = true
 
 var map_coordinates: Vector2 = Vector2(256.0, 256.0)
 
 
-var memory_shards: float = 50.0
+signal shards_changed(amount: float)
 
+var memory_shards: float = 50.0:
+	set(value):
+		if is_equal_approx(memory_shards, value):
+			return
+		memory_shards = value
+		shards_changed.emit(value)
 
 #ui stuff
-@onready var ui: Player_UI = $UI
+@onready var ui: PlayerUI = $UI
 @onready var move_marker: Sprite3D = $MinimapContainer/SubViewportContainer/Minimap/MoveMarker
 
 var all_progress_bars:Dictionary[Squad, BuildProgress]
 
-
-
+@export var player_id: int = 0
 
 func _ready() -> void:
 	#Squad setup
@@ -54,29 +60,33 @@ func _ready() -> void:
 	update_camera_target()
 	
 	#Signal setup
-	ui.Change_State.connect(Player_State_Input)
+	ui.state_requested.connect(_on_state_requested)
 	
 	###connect to each squad's target marker and signals.
 	for _squad:Squad in all_squads:
 		connect_signals(_squad)
 
 func connect_signals(_squad:Squad)->void:
-	_squad.Controller_Add_Squad.connect(Build_Squad)
-	#_squad.RTS_Controller_Check_Progress.connect(add_squad)
+	_squad.squad_terminated.connect(_on_squad_terminated)
 
 
 
 func _input(event: InputEvent) -> void:
+	# Squad-independent commands first.
 	if event.is_action_pressed("next_squad"):  # Tab key or SWIPE_RIGHT
 		cycle_next_squad()
+		return
 	elif event.is_action_pressed("previous_squad"):  # Shift+Tab or SWIPE_LEFT
 		cycle_previous_squad()
+		return
 	
+	# Everything below acts on the current squad.
+	if not is_instance_valid(current_squad):
+		return
 	
-	# Command to buy unit for current squad
-	if event.is_action_pressed("buy_unit"):
-		current_squad.buy_unit()
-	
+	# Debug get a free unit spawn
+	if event.is_action_pressed("debug_spawn_unit"):
+		current_squad.add_unit()
 	
 	# Commands for current squad
 	if event.is_action_pressed("target_command"):  # currently left click eventually TOUCH		and current_squad
@@ -85,40 +95,47 @@ func _input(event: InputEvent) -> void:
 		current_squad.stop_movement()
 
 
-func Player_State_Input(new_state: GlobalEnums.STATES) -> void:
+func _on_state_requested(new_state: GlobalEnums.WHEEL_SLOT) -> void:
+	if not is_instance_valid(current_squad):
+		return
 	current_squad.state_machine.change_state(current_squad.state_machine.states[new_state])
 
-func add_squad(which_squad:Squad, _progress:float, _cost:float, _multiplier:float)->void:
-	if memory_shards >= _cost:
-		memory_shards -= _cost
-		which_squad.progress_build(_progress, _multiplier)
-	else:
-		return
-
-func Build_Squad(where_to_place:Vector3, bought_squad:PackedScene) -> void:
-	var new_squad:Squad = bought_squad.instantiate()
+## Mechanic. Instantiate a squad, place it, wire it, announce it.
+func add_squad(scene: PackedScene, where: Vector3) -> Squad:
+	var new_squad: Squad = scene.instantiate() as Squad
+	if new_squad == null:
+		return null
 	add_child(new_squad)
-	
-	##Position in world
-	new_squad.global_position = Vector3(
-		#unit_spots[all_units.size()].global_position.x, 
-		#all_units[0].global_position.y, 
-		#unit_spots[all_units.size()].global_position.z
-		where_to_place.x,
-		where_to_place.y,
-		where_to_place.z-10
-		)
-	#new_squad.global_rotation = all_units[0].global_rotation
-	
-	
-	###Connect to any squad -> controller signals
+	new_squad.global_position = where
+	new_squad.controller = self
+	new_squad.player_id = player_id
 	connect_signals(new_squad)
-	
 	all_squads.append(new_squad)
+	added_squad.emit(new_squad, all_squads.size() - 1, all_squads.size())
+	return new_squad
+
+##this player's bookkeeping: [br]Drop from all_squads, reassign current_squad, emit removed_squad. 
+##[br]Can't know anything about other teams or the match.
+func _on_squad_terminated(dead_squad: Squad) -> void:
+	var i: int = all_squads.find(dead_squad)
+	if i == -1:
+		return
+	all_squads.remove_at(i)
+	removed_squad.emit(dead_squad, i, all_squads.size())
+	if dead_squad == current_squad:
+		current_squad = null
+		if not all_squads.is_empty():
+			set_active_squad(mini(i, all_squads.size() - 1))
 	
 
+const MAX_VISION_BONUS: int = 100
 
-
+# rts_controller.gd — no accumulator, no signals to wire
+func total_vision_bonus() -> float:
+	var total: float = 0.0
+	for squad: Squad in all_squads:
+		total += squad.vision_contribution()
+	return minf(total, MAX_VISION_BONUS)
 
 
 func cycle_next_squad() -> void:
@@ -151,11 +168,10 @@ func set_active_squad(index: int) -> void:
 	current_camera_mount = current_squad.camera_mount
 	update_camera_target()
 	
-	#Update UI
-	ui.update_player_unit_details(current_squad)
-	
 	# Emit signal for UI updates
-	swap_squad.emit(current_squad_index)
+	swap_squad.emit(current_squad)
+	
+	_snap_next_frame = true 
 
 ###Option for player to increase minimap size on LONG press or SHIFT
 func increase_minimap_scale() -> void:
@@ -207,6 +223,15 @@ func update_camera_target() -> void:
 		camera.global_position = current_camera_mount.global_position
 		camera.rotation = current_camera_mount.rotation
 
+func _camera_target_transform() -> Transform3D:
+	var t: Transform3D = current_camera_mount.global_transform
+	t.basis = t.basis.orthonormalized()          # strip the squad's scale
+	var back: Vector3 = t.basis.z                    # +Z is behind the camera
+	t.origin += back * total_vision_bonus()
+	return t
+
+
+##TODO hook up and also have when a building is lost, reduce the vision bonus. Also fog of war
 
 ### Visual feedback for move command
 func enable_move_marker(position: Vector3) -> void:
@@ -225,11 +250,14 @@ func enable_move_marker(position: Vector3) -> void:
 
 
 func _process(delta: float) -> void:
-	if !current_squad:
-		cycle_next_squad()
-	
-	#keep following the current squad's camera mount
-	camera.position = camera.position.lerp(current_camera_mount.global_position, 5.0 * delta)
-	#update rotation as well
-	camera.rotation = current_squad.rotation
+	if not is_instance_valid(current_squad) or not is_instance_valid(current_camera_mount):
+		return
+	var target: Transform3D = _camera_target_transform()
+	if _snap_next_frame:
+		camera.global_transform = target
+		_snap_next_frame = false
+		return
+	var t: float = 1.0 - pow(0.005, delta)   # frame-rate independent smoothing
+	camera.global_position = camera.global_position.lerp(target.origin, t)
+	camera.quaternion = camera.quaternion.slerp(target.basis.get_rotation_quaternion(), t)
 	

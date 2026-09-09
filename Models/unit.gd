@@ -1,4 +1,4 @@
-extends CharacterBody3D
+extends Node3D
 class_name Unit
 
 
@@ -29,28 +29,4 @@ func _ready() -> void:
 		for child: Node in get_children(true):
 			if child is Attack:
 				default_attack = child
-
-
-#this is the only thing the unit does, consider a way to reduce amount of constant processes
-func _physics_process(delta: float) -> void:
-	#if not is_on_floor():
-		#velocity += get_gravity() * delta
-		#move_and_slide()
-		#return
-	pass
-
-#func _process(delta: float) -> void:
-	## Add the gravity.
-#
-	#
-	##if can_move and has_target_position:
-		### Apply desired movement to velocity
-		##var direction = (target_position - global_position).normalized()
-	##else:
-		##velocity.x = 0
-		##velocity.y = 0
-	#
-#
-	#
-	##move_and_slide()
-	#pass
+	

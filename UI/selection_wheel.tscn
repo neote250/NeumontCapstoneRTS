@@ -1,7 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://g8yosfq1j87r"]
+[gd_scene format=3 uid="uid://g8yosfq1j87r"]
 
 [ext_resource type="Script" uid="uid://cn7wxq3kln833" path="res://UI/selection_wheel.gd" id="1_t2uwe"]
-[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_options.gd" id="2_xe57u"]
+[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_option.gd" id="2_xe57u"]
 [ext_resource type="Texture2D" uid="uid://4cwveasnqjtv" path="res://Assets/icons/war.png" id="3_6sr5e"]
 [ext_resource type="Texture2D" uid="uid://drq63jam1mv6x" path="res://Assets/icons/cross-swords.png" id="4_safyw"]
 [ext_resource type="Texture2D" uid="uid://swyp66tqbang" path="res://Assets/icons/knight.png" id="5_uo4va"]
@@ -10,7 +10,6 @@
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_dy3gf"]
 script = ExtResource("2_xe57u")
-name = 0
 texture = ExtResource("3_6sr5e")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
@@ -38,7 +37,7 @@ name = 4
 texture = ExtResource("7_8y20f")
 metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
 
-[node name="Selection_Wheel" type="Control"]
+[node name="Selection_Wheel" type="Control" unique_id=1375229786]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5

@@ -1,6 +1,6 @@
-[gd_scene load_steps=19 format=3 uid="uid://bnihdwdhoyrnp"]
+[gd_scene format=3 uid="uid://bnihdwdhoyrnp"]
 
-[ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://demo/components/Environment.tscn" id="1_e13gr"]
+[ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://Map/Environment.tscn" id="1_e13gr"]
 [ext_resource type="Terrain3DMaterial" uid="uid://bm26shwyoeo1d" path="res://Map/new_terrain_3d_material.tres" id="1_ohof8"]
 [ext_resource type="Terrain3DAssets" uid="uid://dlgdagdqlrmdx" path="res://Map/new_terrain_3d_assets.tres" id="2_08stc"]
 [ext_resource type="Script" uid="uid://bw06xtofvfhh6" path="res://Player/rts_controller.gd" id="4_uf72f"]
@@ -119,14 +119,14 @@ void fragment() {
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_e13gr"]
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_lhttk"]
+noise = SubResource("FastNoiseLite_e13gr")
 seamless = true
 as_normal_map = true
-noise = SubResource("FastNoiseLite_e13gr")
 
 [sub_resource type="NoiseTexture2D" id="NoiseTexture2D_uf72f"]
+noise = SubResource("FastNoiseLite_e13gr")
 seamless = true
 as_normal_map = true
-noise = SubResource("FastNoiseLite_e13gr")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_lhttk"]
 render_priority = 0
@@ -169,22 +169,19 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 shadow_size = 6
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_wd2o4"]
-viewport_path = NodePath("HealthBar3D/SubViewport")
+[node name="Node3D" type="Node3D" unique_id=1066680028]
 
-[node name="Node3D" type="Node3D"]
+[node name="Environment" parent="." unique_id=1471503805 instance=ExtResource("1_e13gr")]
 
-[node name="Environment" parent="." instance=ExtResource("1_e13gr")]
-
-[node name="Water" type="MeshInstance3D" parent="."]
+[node name="Water" type="MeshInstance3D" parent="." unique_id=155345490]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 138.891, -3.0327, 133.852)
 top_level = true
 mesh = SubResource("BoxMesh_w7w4i")
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1468888480]
 navigation_mesh = SubResource("NavigationMesh_w7w4i")
 
-[node name="Terrain3D" type="Terrain3D" parent="NavigationRegion3D"]
+[node name="Terrain3D" type="Terrain3D" parent="NavigationRegion3D" unique_id=847668156]
 data_directory = "res://Map"
 material = ExtResource("1_ohof8")
 assets = ExtResource("2_08stc")
@@ -194,19 +191,20 @@ collision_mask = 5
 top_level = true
 metadata/_edit_lock_ = true
 
-[node name="GameManager" type="Node" parent="." node_paths=PackedStringArray("teams", "wild_squads")]
+[node name="GameManager" type="Node" parent="." unique_id=613042413 node_paths=PackedStringArray("teams", "wild_squads")]
 script = ExtResource("7_8uw46")
 teams = [NodePath("../Player")]
 wild_squads = [NodePath("../WildSquad"), NodePath("../WildSquad2"), NodePath("../WildSquad3"), NodePath("../WildSquad4"), NodePath("../WildSquad5"), NodePath("../WildSquad7")]
 
-[node name="Player" type="Node" parent="." node_paths=PackedStringArray("all_squads")]
+[node name="Player" type="Node" parent="." unique_id=1017135526 node_paths=PackedStringArray("all_squads")]
 script = ExtResource("4_uf72f")
 all_squads = [NodePath("BuildingSquad"), NodePath("SecondSquad")]
 
-[node name="UI" parent="Player" node_paths=PackedStringArray("owning_player") instance=ExtResource("6_uf72f")]
+[node name="UI" parent="Player" unique_id=820918246 node_paths=PackedStringArray("owning_player", "display_builds_progress") instance=ExtResource("6_uf72f")]
 owning_player = NodePath("..")
+display_builds_progress = []
 
-[node name="MinimapContainer" type="PanelContainer" parent="Player"]
+[node name="MinimapContainer" type="PanelContainer" parent="Player" unique_id=2035925499]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -217,71 +215,52 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_uf72f")
 
-[node name="SubViewportContainer" type="SubViewportContainer" parent="Player/MinimapContainer"]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="Player/MinimapContainer" unique_id=229253525]
 layout_mode = 2
 
-[node name="Minimap" type="SubViewport" parent="Player/MinimapContainer/SubViewportContainer"]
+[node name="Minimap" type="SubViewport" parent="Player/MinimapContainer/SubViewportContainer" unique_id=417349451]
 handle_input_locally = false
 size = Vector2i(256, 256)
 render_target_update_mode = 4
 
-[node name="Camera3D" type="Camera3D" parent="Player/MinimapContainer/SubViewportContainer/Minimap"]
+[node name="Camera3D" type="Camera3D" parent="Player/MinimapContainer/SubViewportContainer/Minimap" unique_id=1828688206]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 124, 160, 125)
 
-[node name="MoveMarker" parent="Player/MinimapContainer/SubViewportContainer/Minimap" instance=ExtResource("7_w7w4i")]
+[node name="MoveMarker" parent="Player/MinimapContainer/SubViewportContainer/Minimap" unique_id=1322198154 instance=ExtResource("7_w7w4i")]
 transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 115.687, 18.1929, 108.346)
 visible = false
 
-[node name="Camera3D" type="Camera3D" parent="Player"]
+[node name="Camera3D" type="Camera3D" parent="Player" unique_id=1350415055]
 cull_mask = 1048571
 
-[node name="BuildingSquad" parent="Player" node_paths=PackedStringArray("controller") instance=ExtResource("8_wd2o4")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 207.751, 16.9647, 207.377)
+[node name="BuildingSquad" parent="Player" unique_id=274064640 node_paths=PackedStringArray("controller") instance=ExtResource("8_wd2o4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 207.751, 16.9647, 207.377)
 controller = NodePath("..")
 
-[node name="SecondSquad" parent="Player" node_paths=PackedStringArray("controller") instance=ExtResource("5_lhttk")]
+[node name="SecondSquad" parent="Player" unique_id=1507842027 node_paths=PackedStringArray("controller") instance=ExtResource("5_lhttk")]
 transform = Transform3D(-0.999854, 0, -0.0170858, 0, 1, 0, 0.0170858, 0, -0.999854, 109.401, 2.13038, 143.881)
 controller = NodePath("..")
 
-[node name="WildSquad" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad" parent="." unique_id=419166416 instance=ExtResource("5_lhttk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.527, 0.243382, 176.704)
 player_id = -1
 
-[node name="BasicShot" parent="WildSquad/Unit/WeaponComponent" index="0"]
-attack_damage = 3
-
-[node name="HealthBar3D" parent="WildSquad/Unit" index="4"]
-texture = SubResource("ViewportTexture_wd2o4")
-
-[node name="StateMachine" parent="WildSquad" index="9" node_paths=PackedStringArray("states")]
-states = {
-0: NodePath("ReadyState"),
-1: NodePath("WarpathState"),
-2: NodePath("TargetState"),
-3: NodePath("MarchState"),
-4: NodePath("BuildState")
-}
-
-[node name="WildSquad7" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad7" parent="." unique_id=1606102332 instance=ExtResource("5_lhttk")]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 164.459, 0.243382, 32.9995)
 player_id = -1
 
-[node name="WildSquad2" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad2" parent="." unique_id=2055150818 instance=ExtResource("5_lhttk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77.6975, 1.52787, 189.283)
 player_id = -1
 
-[node name="WildSquad3" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad3" parent="." unique_id=716185529 instance=ExtResource("5_lhttk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.2916, 17.0103, 189.283)
 player_id = -1
 
-[node name="WildSquad5" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad5" parent="." unique_id=1314986108 instance=ExtResource("5_lhttk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.0677, 17.0103, 196.86)
 player_id = -1
 
-[node name="WildSquad4" parent="." instance=ExtResource("5_lhttk")]
+[node name="WildSquad4" parent="." unique_id=2034866666 instance=ExtResource("5_lhttk")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.2916, 17.0103, 203.015)
 player_id = -1
-
-[editable path="WildSquad"]
-[editable path="WildSquad/Unit"]
-[editable path="WildSquad/Unit/skeleton_mage"]

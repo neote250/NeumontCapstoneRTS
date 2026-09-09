@@ -1,18 +1,6 @@
 extends State
 
+##TODO this state still needs a lot of work
 
-func Enter() -> void:
+func enter() -> void:
 	super()
-
-func Exit() -> void:
-	pass
-
-func State_Input(event:InputEvent) -> State:
-	return null
-
-func State_Update(_delta: float) -> State:
-	return null
-
-
-func State_Physics_Update(_delta: float) -> State:
-	return null

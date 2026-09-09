@@ -13,22 +13,22 @@ func _ready() -> void:
 		parent = get_parent().get_parent()
 
 ###Setup when entering the state
-func Enter() -> void:
+func enter() -> void:
 	#parent.animations.play(animation_name)
 	pass
 
 ###Requirements when exiting the state
-func Exit() -> void:
+func exit() -> void:
 	pass
 
 ###Handle player input specific for the state
-func State_Input(event:InputEvent) -> State:
+func state_input(event:InputEvent) -> State:
 	return null
 
 ###Handle processes in the state that need to run faster than framerate
-func State_Update(_delta: float) -> State:
+func state_update(_delta: float) -> State:
 	return null
 
 ###Handle processes in the state that do not need to run faster than framerate
-func State_Physics_Update(_delta: float) -> State:
+func state_physics_update(_delta: float) -> State:
 	return null

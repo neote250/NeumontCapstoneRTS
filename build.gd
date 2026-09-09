@@ -1,18 +1,33 @@
 extends Node
 class_name Build
 
+signal building_changed(build: Build, active: bool)
+
 @export var parent:Squad
 @export var type_of_upgrade:GlobalEnums.UPGRADE_TYPE
 
 @export var duration: float = 30.0
 var current_progress:float = 0.0
-var is_building:bool = false
 
-@export var cost: int = 20
+var is_building: bool = false:
+	set(value):
+		if is_building == value:
+			return
+		is_building = value
+		building_changed.emit(self, value)
+
+@export var cost: int = 0    ## Total shards at normal efficiency. 0 = use the squad's price.
+
+func total_cost() -> float:
+	if cost > 0:
+		return float(cost)
+	return parent.price_of(type_of_upgrade)
 
 @export var repeatable:bool = false
 
 @export var squad_type_to_buy:PackedScene = preload("res://Models/squad.tscn")
+@export var weapon_to_grant: PackedScene
+
 #var weapon_type_to_buy
 
 func _ready() -> void:
@@ -20,26 +35,22 @@ func _ready() -> void:
 		parent = get_parent() as Squad
 
 ###Connect the upgrade type to squad function or squad signals to controller
-func complete()->void:
+func complete()->bool:
 	match type_of_upgrade:
 		GlobalEnums.UPGRADE_TYPE.BUY_UNIT:
-			parent.add_unit()
+			return parent.add_unit()
+			
 		GlobalEnums.UPGRADE_TYPE.BUY_SQUAD:
-			buy_squad()
-		#GlobalEnums.UPGRADE_TYPE.GET_WEAPON:
-			#_upgrade.completed.connect(get_weapon)
+			return parent.add_squad(squad_type_to_buy)
+		GlobalEnums.UPGRADE_TYPE.GET_WEAPON:
+			return parent.grant_weapon(weapon_to_grant)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_WEAPON:
-			#_upgrade.completed.connect(upgrade_weapon)
 		#GlobalEnums.UPGRADE_TYPE.BUY_AMMO:
-			#_upgrade.completed.connect(buy_ammo)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_HEALTH:
-			#_upgrade.completed.connect(upgrade_health)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_ARMOR:
-			#_upgrade.completed.connect(upgrade_armor)
 		_:
-			print("connecting to build went wrong")
-	return
-
+			push_warning("Build %s has no completion handler" % self)
+			return false
 
 func get_weapon():
 	pass
@@ -56,21 +67,37 @@ func upgrade_health():
 func upgrade_armor():
 	pass
 
-##Any logic on the squad itself when the upgrade to buy a squad completes.
-##For example limited buys, like you pick up the building kit at the base
-func buy_squad() -> void:
-	parent.Controller_Add_Squad.emit(parent.global_position, squad_type_to_buy)
 
-##
-func check_build(_progress:float, cost:float, multiplier:float) -> void:
-	#parent.RTS_Controller_Check_Progress.emit(parent, _delta, cost)
-	if parent.controller.memory_shards > cost * _progress:
-		parent.controller.memory_shards -= _progress * cost
-		current_progress += _progress * multiplier
-		#if parent.controller.ui.build_dict.has(self):
-		if current_progress >= duration:
-			current_progress = 0
-			complete()
+
+##The efficiency knob is the ratio cost_multiplier ÷ speed_multiplier, not either export alone.
+func check_build(delta:float, speed_multiplier:float, cost_multiplier:float = 1.0) -> bool:
+	if parent.controller == null or not is_building:
+		return false
+	
+	var work: float = minf(delta * speed_multiplier, duration - current_progress)
+	if work <= 0.0:
+		return false
+	
+	##Spending
+	#one line instead of three, and no knowledge of controllers
+	var spend: float = (total_cost() / duration) * work * (cost_multiplier / speed_multiplier)
+	if not parent.try_spend(spend):
+		return false                       # stall this frame, don't charge
+	current_progress += work
+	
+	if current_progress >= duration:
+		if complete():                # make complete() return bool
+			current_progress = 0.0
+			if not repeatable:
+				is_building = false
+		else:
+			current_progress = duration   # hold at full, stop billing
+			is_building = false          # and tell the player why
+	return true
+
+
+
+
 
 func _to_string() -> String:
 	match type_of_upgrade:
@@ -79,14 +106,9 @@ func _to_string() -> String:
 		GlobalEnums.UPGRADE_TYPE.BUY_SQUAD:
 			return "Buy a Squad"
 		#GlobalEnums.UPGRADE_TYPE.GET_WEAPON:
-			#_upgrade.completed.connect(get_weapon)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_WEAPON:
-			#_upgrade.completed.connect(upgrade_weapon)
 		#GlobalEnums.UPGRADE_TYPE.BUY_AMMO:
-			#_upgrade.completed.connect(buy_ammo)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_HEALTH:
-			#_upgrade.completed.connect(upgrade_health)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_ARMOR:
-			#_upgrade.completed.connect(upgrade_armor)
 		_:
 			return ("connecting to build went wrong")

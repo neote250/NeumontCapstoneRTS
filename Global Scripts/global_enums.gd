@@ -1,14 +1,28 @@
-extends Node
+extends RefCounted
 class_name GlobalEnums
 
-enum STATES 
+enum WHEEL_SLOT 
 {
-CENTER, 			#stand and shoot anything that approaches
-UP, 		#Attack everything on the way to the target
-LEFT, 		#Ignore everything else and move to attack the target
-DOWN, 			#Just move, don't get distracted by attacking
-RIGHT		#Attack while moving to stay at full range
+DEFAULT, 
+AGGRESSIVE, 
+FOCUS, 
+MOVE, 
+ECONOMY
 }
+
+##For a generic unit
+#stand and shoot anything that approaches
+#Attack everything on the way to the target
+#Ignore everything else and move to attack the target
+#Just move, don't get distracted by attacking
+#Attack while moving to stay at full range
+
+##For a generic building
+#build mode
+#turret mode?
+#overcharge?
+#
+#
 
 enum UPGRADE_TYPE
 {
@@ -21,6 +35,12 @@ enum UPGRADE_TYPE
 	UPGRADE_ARMOR
 }
 
+enum STANCE
+{
+	HOLD_FIRE, # Nothing. Stay hidden, save ammo, avoid pulling a fight.
+	RETURN_FIRE, # Only what has damaged you recently. Passive, no repositioning.
+	WEAPONS_FREE # Anything hostile in range, proactively.
+}
 
 enum ANIM_STATES {IDLE, MOVING, ATTACKING, DEAD}
 

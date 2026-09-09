@@ -1,32 +1,20 @@
-extends State
+extends BuildState
 
-func Enter() -> void:
+@export var heat_per_second: float = 12.0
+@export var heat_limit: float = 100.0
+var heat: float = 0.0
+
+func enter() -> void:
 	super()
-	for upgrade:Build in parent.upgrades:
-		if upgrade.is_building:
-			parent.current_upgrading.append(upgrade)
-
-func Exit() -> void:
-	pass
-
-func State_Input(event:InputEvent) -> State:
-	return null
-
-func State_Update(_delta: float) -> State:
-	return null
+	heat = 0.0
 
 
-func State_Physics_Update(_delta: float) -> State:
-	if parent.upgrades.is_empty():
-		var isUpgrading:bool = false
-		for upgrade:Build in parent.upgrades:
-			if upgrade.is_building:
-				isUpgrading = true
-		if !isUpgrading:
-			return parent.state_machine.states[GlobalEnums.STATES.CENTER]
-	
-	##check resources to see if can build for each build currently upgrading
-	for upgrade in parent.upgrades:
-		if upgrade.is_building:
-			upgrade.check_build(_delta, 2, 2)
+
+func state_physics_update(delta: float) -> State:
+	var next_state: State = super(delta)    # run the shared build logic
+	if next_state:
+		return next_state
+	heat += heat_per_second * delta
+	if heat >= heat_limit:
+		return parent.state_machine.states[GlobalEnums.WHEEL_SLOT.DEFAULT]   # overheat, drop out
 	return null

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://1cmfjqxuuyw1"]
+[gd_scene format=3 uid="uid://1cmfjqxuuyw1"]
 
 [ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
 [ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
@@ -14,49 +14,48 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
 size = Vector3(7.219, 2.8, 4.48)
 
-[node name="Squad" type="CharacterBody3D" node_paths=PackedStringArray("buy_unit_upgrade", "state_machine", "default_state")]
+[node name="Squad" type="CharacterBody3D" unique_id=1992618434 node_paths=PackedStringArray("upgrades", "state_machine", "default_state")]
 process_mode = 3
 collision_layer = 4
-collision_mask = 6
+collision_mask = 4
 script = ExtResource("1_xp1uv")
 speed = 200
-buy_unit_upgrade = NodePath("buy_unit_build")
+upgrades = [NodePath("buy_unit_build")]
 state_machine = NodePath("StateMachine")
 default_state = NodePath("StateMachine/ReadyState")
 
-[node name="CameraMount" type="Node3D" parent="."]
-transform = Transform3D(-1, 8.74228e-08, 0, 7.57103e-08, 0.866026, 0.5, 4.37114e-08, 0.5, -0.866026, 0.339889, 4.66579, 6.25614)
+[node name="CameraMount" type="Node3D" parent="." unique_id=1845245194]
+transform = Transform3D(1, 0, 0, 0, 0.8660258, 0.50000024, 0, -0.50000024, 0.8660258, 0.339889, 4.66579, 6.25614)
 
-[node name="Unit1Spot" type="Marker3D" parent="."]
+[node name="Unit1Spot" type="Marker3D" parent="." unique_id=991814460]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0648593, 0)
 
-[node name="Unit2Spot" type="Marker3D" parent="."]
+[node name="Unit2Spot" type="Marker3D" parent="." unique_id=1968670995]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.14515, 0.0648593, 0.980836)
 
-[node name="Unit3Spot" type="Marker3D" parent="."]
+[node name="Unit3Spot" type="Marker3D" parent="." unique_id=2018282378]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.09136, 0.0648593, 0.980836)
 
-[node name="Unit4Spot" type="Marker3D" parent="."]
+[node name="Unit4Spot" type="Marker3D" parent="." unique_id=486435396]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5809, 0.0648593, 2.70805)
 
-[node name="Unit5Spot" type="Marker3D" parent="."]
+[node name="Unit5Spot" type="Marker3D" parent="." unique_id=95660588]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.89916, 0.0648593, 2.70805)
 
-[node name="Unit" parent="." instance=ExtResource("1_gqsy5")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+[node name="Unit" parent="." unique_id=1368871638 instance=ExtResource("1_gqsy5")]
 
-[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1456003896]
 debug_enabled = true
 debug_path_custom_color = Color(1, 0, 1, 1)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1849419327]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35225, 1.30846)
 visible = false
 shape = SubResource("BoxShape3D_04802")
 debug_color = Color(0.917647, 0, 0.709804, 0)
 debug_fill = false
 
-[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("states")]
+[node name="StateMachine" type="Node" parent="." unique_id=649850477 node_paths=PackedStringArray("states")]
 script = ExtResource("3_5tp08")
 states = {
 0: NodePath("ReadyState"),
@@ -66,31 +65,31 @@ states = {
 4: NodePath("BuildState")
 }
 
-[node name="ReadyState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="ReadyState" type="Node" parent="StateMachine" unique_id=1756219822 node_paths=PackedStringArray("parent")]
 script = ExtResource("4_svthc")
 parent = NodePath("../..")
 
-[node name="TargetState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="TargetState" type="Node" parent="StateMachine" unique_id=261623139 node_paths=PackedStringArray("parent")]
 script = ExtResource("5_3ly0y")
 parent = NodePath("../..")
 
-[node name="MarchState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="MarchState" type="Node" parent="StateMachine" unique_id=1526086349 node_paths=PackedStringArray("parent")]
 script = ExtResource("6_l1b2l")
 parent = NodePath("../..")
 
-[node name="WarpathState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="WarpathState" type="Node" parent="StateMachine" unique_id=982883870 node_paths=PackedStringArray("parent")]
 script = ExtResource("7_2vagg")
 parent = NodePath("../..")
 
-[node name="SkirmishState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="SkirmishState" type="Node" parent="StateMachine" unique_id=141258572 node_paths=PackedStringArray("parent")]
 script = ExtResource("8_8138w")
 parent = NodePath("../..")
 
-[node name="BuildState" type="Node" parent="StateMachine" node_paths=PackedStringArray("parent")]
+[node name="BuildState" type="Node" parent="StateMachine" unique_id=1297450734 node_paths=PackedStringArray("parent")]
 script = ExtResource("9_6tmdr")
 parent = NodePath("../..")
 
-[node name="buy_unit_build" parent="." node_paths=PackedStringArray("parent") instance=ExtResource("9_brepm")]
+[node name="buy_unit_build" parent="." unique_id=446418016 node_paths=PackedStringArray("parent") instance=ExtResource("9_brepm")]
 parent = NodePath("..")
 duration = 5.0
 repeatable = true

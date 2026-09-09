@@ -9,10 +9,10 @@ var health:float = 0:
 		health = min(max_value, new_health)
 		value = health
 
-func init_health(_health:int) -> void:
+func init_health(_health:float) -> void:
+	max_value = _health
+	min_value = 0.0
 	health = _health
-	max_value = health
-	value = health
 
 #func _ready() -> void:
 	#show_percentage = false
