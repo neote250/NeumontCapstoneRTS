@@ -6,12 +6,6 @@ class_name State
 
 @export var parent: Squad
 
-#
-#signal Transitioned
-func _ready() -> void:
-	if !parent:
-		parent = get_parent().get_parent()
-
 ###Setup when entering the state
 func enter() -> void:
 	#parent.animations.play(animation_name)
@@ -28,6 +22,12 @@ func state_input(event:InputEvent) -> State:
 ###Handle processes in the state that need to run faster than framerate
 func state_update(_delta: float) -> State:
 	return null
+
+
+## Does this state pick its own targets? States that do take over weapon
+## control; everything else leaves the squad's passive stance running.
+func controls_weapons() -> bool:
+	return false
 
 ###Handle processes in the state that do not need to run faster than framerate
 func state_physics_update(_delta: float) -> State:

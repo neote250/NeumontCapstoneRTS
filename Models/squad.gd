@@ -18,8 +18,6 @@ signal roster_changed(squad: Squad)
 const smoothing_factor: float = 0.1
 
 
-#so the ui knows which squad it is, assigned during ownership to owning player's rts controller
-var squad_index: int
 #owning player 
 @export var player_id: int = 0
 @export var controller:RTSController
@@ -31,7 +29,6 @@ var _range_query: PhysicsShapeQueryParameters3D = PhysicsShapeQueryParameters3D.
 
 #variable unit info, obviously currently pointless until different unit squad types
 @export var unit_type:PackedScene = preload("res://Models/unit.tscn")
-var unit_default_attack: Attack
 
 #squad builder
 @export var squad_spawn_distance: float = 10.0
@@ -63,8 +60,6 @@ var _stagger: int = 0
 
 #unit array stuff
 @export var all_units: Array[Unit] = []
-var current_unit_index: int = 0
-var current_unit: Unit
 @export var unit_spots: Array[Marker3D]
 
 #state machine stuff
@@ -134,19 +129,10 @@ func select() -> void:
 func vision_contribution() -> float:
 	return vision_per_unit * all_units.size()
 
-func _on_input_event(camera: Node, event: InputEvent, position: Vector3, normal: Vector3, shape_idx: int) -> void:
-	if event.is_action_pressed("target_command") and event.pressed:
-		print(self.name)
-		#take_damage($WeaponComponent/BasicShot)
+func _on_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
+	if event.is_action_pressed("target_command"):
 		select()
-		
 		#get_viewport().set_input_as_handled()
-	
-
-#func _input_event(camera: Camera3D, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
-	#
-	#if event.is_action_pressed("target_command"):
-		#select()
 
 
 ###Don't manually set target, use this function
@@ -351,6 +337,8 @@ func buy_unit() -> PurchaseResult:
 
 ## Mechanic. Called by Build.complete(), by _ready() for the starting units,
 ## and by the debug hotkey. Never touches shards.
+## TODO tell the RTS controller to increase vision when the roster grows.
+## TODO disable the UI's recruit button once the squad is at max size.
 func add_unit() -> bool:
 	if not has_room():
 		return false
@@ -371,40 +359,20 @@ func find_build(type: GlobalEnums.UPGRADE_TYPE) -> Build:
 	return null
 
 
-#func add_unit() -> bool:
-	#if not has_room():
-		#return false
-	#var spot: Marker3D = unit_spots[all_units.size()]
-	###instantiate another unit and do all the ready stuff
-	#var new_unit:Unit = unit_type.instantiate() as Unit
-	#add_child(new_unit)
-	#
-	###Position in world
-	##new_unit.global_position = Vector3(
-		##unit_spots[all_units.size()].global_position.x, 
-		##all_units[0].global_position.y, 
-		##unit_spots[all_units.size()].global_position.z
-		##)
-	##new_unit.global_rotation = all_units[0].global_rotation
-	#new_unit.global_position = spot.global_position
-	#new_unit.global_rotation = global_rotation
-	#
-	###Connect signals
-	#connect_signals(new_unit)
-	#
-	###Finally add to array
-	#all_units.append(new_unit)
-	#
-	##Disable ui button if max size
-	##if all_units.size() >= max_squad_size:
-		##controller.ui.build_dict[]
-	#
-	###TODO here is where to connect to rts controller to inform to increase vision
-	#
-	#
-	#return true
-#
-
+## Fire at the nearest hostile, according to stance. Runs for any state
+## that does not control weapons itself.
+func _passive_fire(delta: float) -> void:
+	if stance == GlobalEnums.STANCE.HOLD_FIRE:
+		set_target(null)
+		return
+	if all_units.is_empty():
+		return
+	var threat: Squad = closest_squad_in_range()
+	set_target(threat)          # damage_dealt reads target_squad — not optional
+	if threat == null:
+		return
+	for unit: Unit in all_units:
+		unit.weapon_component.damage_target(delta)
 
 #remove a unit from the squad
 func remove_unit(removed_unit: Unit) -> void:
@@ -441,10 +409,6 @@ func connect_signals(_unit:Unit)->void:
 	_unit.health_component.died.connect(remove_unit)
 	_unit.weapon_component.deal_damage.connect(on_damage_dealt)
 
-#return this squad's camera mount
-func get_camera_mount() -> Node3D:
-	return camera_mount
-
 
 @export var formation_catchup_speed: float = 6.0
 const FORMATION_ARRIVAL_THRESHOLD: float = 0.05
@@ -477,6 +441,9 @@ func align_to_squad_default_placement(delta: float) -> void:
 #handling movement at framerate
 func _physics_process(delta: float) -> void:
 	state_machine.state_machine_physics_process(delta)  # 1. squad moves x/z
+	if not state_machine.current_state.controls_weapons():
+		_passive_fire(delta)
 	_snap_to_ground()                                    # y, exact
 	align_to_squad_default_placement(delta)             # 2. units close on slots (local)
 	_snap_units_to_ground()                             # 3. y from terrain (global)
+	

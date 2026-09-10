@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://ddw7a26sgwtag"]
+
+[ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://Map/Environment.tscn" id="1_gcdra"]
+[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="2_3kj03"]
+
+[node name="Node3D" type="Node3D" unique_id=1182943826]
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1835856697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.005, 1.835, 2.715)
+
+[node name="Environment" parent="." unique_id=2112840606 instance=ExtResource("1_gcdra")]
+
+[node name="Unit" parent="." unique_id=1026092460 instance=ExtResource("2_3kj03")]
+
+[node name="Unit2" parent="." unique_id=2014079660 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.185, 0, 0)
+
+[node name="Unit3" parent="." unique_id=636277902 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.23, 0, 0)
+
+[node name="Unit4" parent="." unique_id=850942183 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.39)
+
+[node name="Unit5" parent="." unique_id=242037599 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.215)
+
+[node name="Unit6" parent="." unique_id=1540645196 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.405)
+
+[node name="Unit7" parent="." unique_id=361542419 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.64)
+
+[node name="Unit8" parent="." unique_id=1273544900 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.825)
+
+[node name="Unit9" parent="." unique_id=492176927 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.255)
+
+[node name="Unit10" parent="." unique_id=1987066353 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.7)
+
+[node name="Unit11" parent="." unique_id=2082428949 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.605)
+
+[node name="Unit12" parent="." unique_id=425824514 instance=ExtResource("2_3kj03")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1)
+
+[node name="Unit13" parent="." unique_id=1625732601 instance=ExtResource("2_3kj03")]
+
+[node name="Unit14" parent="." unique_id=974565232 instance=ExtResource("2_3kj03")]
+
+[node name="Unit15" parent="." unique_id=66564196 instance=ExtResource("2_3kj03")]
+
+[node name="Unit16" parent="." unique_id=1836719884 instance=ExtResource("2_3kj03")]
+
+[node name="Unit17" parent="." unique_id=1185652099 instance=ExtResource("2_3kj03")]
+
+[node name="Unit18" parent="." unique_id=2016377498 instance=ExtResource("2_3kj03")]
+
+[node name="Unit19" parent="." unique_id=180611382 instance=ExtResource("2_3kj03")]
+
+[node name="Unit20" parent="." unique_id=551407887 instance=ExtResource("2_3kj03")]
+
+[node name="Unit21" parent="." unique_id=755717687 instance=ExtResource("2_3kj03")]
+
+[node name="Unit22" parent="." unique_id=1671353140 instance=ExtResource("2_3kj03")]
+
+[node name="Unit23" parent="." unique_id=1797595256 instance=ExtResource("2_3kj03")]
+
+[node name="Unit24" parent="." unique_id=735384451 instance=ExtResource("2_3kj03")]
+
+[node name="Unit25" parent="." unique_id=1509034647 instance=ExtResource("2_3kj03")]
+
+[node name="Unit26" parent="." unique_id=599817143 instance=ExtResource("2_3kj03")]
+
+[node name="Unit27" parent="." unique_id=132922379 instance=ExtResource("2_3kj03")]
+
+[node name="Unit28" parent="." unique_id=2015129571 instance=ExtResource("2_3kj03")]
+
+[node name="Unit29" parent="." unique_id=556952797 instance=ExtResource("2_3kj03")]
+
+[node name="Unit30" parent="." unique_id=756195533 instance=ExtResource("2_3kj03")]
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=1271818197]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="PanelContainer" unique_id=941958644]
+layout_mode = 2
+
+[node name="SubViewport" type="SubViewport" parent="PanelContainer/SubViewportContainer" unique_id=1940740092]
+size = Vector2i(256, 256)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="PanelContainer/SubViewportContainer/SubViewport" unique_id=2034246260]
+transform = Transform3D(1, 0, 0, 0, -0.13052621, 0.9914449, 0, -0.9914449, -0.13052621, -0.015, 8.74, 0.3)

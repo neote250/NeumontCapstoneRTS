@@ -9,6 +9,9 @@ func enter() -> void:
 	#parent.has_target = true
 
 
+func controls_weapons() -> bool:
+	return true
+
 ###fire each weapon if within range, else move closer to target
 func state_physics_update(_delta: float) -> State:
 	#need to do the other half of if target_squad is dead, signal to attacking squad that it has no target anymore

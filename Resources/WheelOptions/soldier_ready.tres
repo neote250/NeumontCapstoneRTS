@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="WheelOption" format=3 uid="uid://b26ubpw7lln26"]
+
+[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_option.gd" id="1_uroi0"]
+[ext_resource type="Texture2D" uid="uid://swyp66tqbang" path="res://Assets/icons/knight.png" id="2_w0y7w"]
+
+[resource]
+script = ExtResource("1_uroi0")
+texture = ExtResource("2_w0y7w")
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"

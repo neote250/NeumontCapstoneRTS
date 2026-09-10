@@ -18,19 +18,11 @@ func damage(attacker: Squad, attack:Attack, target:Squad) -> void:
 	if not Teams.is_hostile(attacker.player_id, target.player_id):
 		return
 	target.take_damage(attack)
-	#match gm_target_squad.player_id:
-		#-1:
-			#if gm_target_squad: gm_target_squad.take_damage(gm_attack)
-		#0:
-			##player controller stuff
-			#if gm_target_squad: gm_target_squad.take_damage(gm_attack)
-		#_:
-			#pass#default case
 
-
-###
-func added_squad_connect()->void:
-	pass
+	# Possible future routing: branch on target.player_id so a hit on a
+	# neutral, an ally and an enemy can score differently — a neutral kill
+	# paying a bounty, friendly fire costing something, an enemy hit scoring
+	# normally. Today every hostile hit takes the same path.
 
 
 func register_squad(squad: Squad) -> void:

@@ -9,7 +9,8 @@ func enter() -> void:
 	#parent.has_target = true
 
 
-
+func controls_weapons() -> bool:
+	return true
 
 
 ###fire each weapon if within range, else move closer to target

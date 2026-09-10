@@ -11,9 +11,6 @@
 [ext_resource type="PackedScene" uid="uid://6igk31dktu27" path="res://build.tscn" id="9_jwlxe"]
 [ext_resource type="Script" uid="uid://5u7duran23mt" path="res://Models/build_state.gd" id="9_om28s"]
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_om28s"]
-viewport_path = NodePath("HealthBar3D/SubViewport")
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
 size = Vector3(7.219, 2.8, 4.48)
 
@@ -28,7 +25,7 @@ unit_cost = 50
 upgrades = [NodePath("BuySquadBuild")]
 squad_type = 1
 state_machine = NodePath("StateMachine")
-default_state = NodePath("StateMachine/ReadyState")
+default_state = NodePath("StateMachine/BuildState")
 vision_per_unit = 8.0
 
 [node name="CameraMount" type="Node3D" parent="." unique_id=267450831]
@@ -51,12 +48,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.89916, 0.0648593, 2.70805)
 
 [node name="Building" parent="." unique_id=45130360 instance=ExtResource("2_f5d1k")]
 
-[node name="BasicShot" parent="Building/WeaponComponent" parent_id_path=PackedInt32Array(45130360, 1803495554) index="0" unique_id=1593757756]
-attack_damage = 0
-
-[node name="HealthBar3D" parent="Building" index="4" unique_id=1379299911]
-texture = SubResource("ViewportTexture_om28s")
-
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1900132008]
 debug_enabled = true
 debug_path_custom_color = Color(1, 0, 1, 1)
@@ -71,11 +62,10 @@ debug_fill = false
 [node name="StateMachine" type="Node" parent="." unique_id=87455622 node_paths=PackedStringArray("states")]
 script = ExtResource("3_jwlxe")
 states = {
-0: NodePath("ReadyState"),
+0: NodePath("BuildState"),
 1: NodePath("TurretState"),
 2: NodePath("OverchargeState"),
-3: NodePath("SupplyState"),
-4: NodePath("BuildState")
+3: NodePath("SupplyState")
 }
 
 [node name="ReadyState" type="Node" parent="StateMachine" unique_id=130712317 node_paths=PackedStringArray("parent")]
@@ -105,11 +95,8 @@ parent = NodePath("../..")
 
 [node name="OverchargeState" type="Node" parent="StateMachine" unique_id=973441285 node_paths=PackedStringArray("parent")]
 script = ExtResource("6_ka4oq")
-heat_per_second = null
-heat_limit = null
 speed_multiplier = 2.0
 cost_multiplier = 3.0
-animation_name = null
 move_speed = 0.0
 parent = NodePath("../..")
 
@@ -118,5 +105,3 @@ parent = NodePath("..")
 type_of_upgrade = 1
 duration = 10.0
 cost = 5
-
-[editable path="Building"]

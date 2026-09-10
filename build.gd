@@ -28,8 +28,6 @@ func total_cost() -> float:
 @export var squad_type_to_buy:PackedScene = preload("res://Models/squad.tscn")
 @export var weapon_to_grant: PackedScene
 
-#var weapon_type_to_buy
-
 func _ready() -> void:
 	if !parent:
 		parent = get_parent() as Squad
@@ -51,22 +49,6 @@ func complete()->bool:
 		_:
 			push_warning("Build %s has no completion handler" % self)
 			return false
-
-func get_weapon():
-	pass
-
-func upgrade_weapon():
-	pass
-
-func buy_ammo():
-	pass
-
-func upgrade_health():
-	pass
-
-func upgrade_armor():
-	pass
-
 
 
 ##The efficiency knob is the ratio cost_multiplier ÷ speed_multiplier, not either export alone.

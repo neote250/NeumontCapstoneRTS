@@ -44,6 +44,7 @@ folder_colors={
 "res://Map/": "green",
 "res://Models/": "purple",
 "res://Player/": "gray",
+"res://Resources/": "yellow",
 "res://Sandbox/": "pink",
 "res://UI/": "blue"
 }

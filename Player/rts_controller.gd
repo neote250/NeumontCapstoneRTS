@@ -40,8 +40,6 @@ var memory_shards: float = 50.0:
 @onready var ui: PlayerUI = $UI
 @onready var move_marker: Sprite3D = $MinimapContainer/SubViewportContainer/Minimap/MoveMarker
 
-var all_progress_bars:Dictionary[Squad, BuildProgress]
-
 @export var player_id: int = 0
 
 func _ready() -> void:
@@ -98,7 +96,7 @@ func _input(event: InputEvent) -> void:
 func _on_state_requested(new_state: GlobalEnums.WHEEL_SLOT) -> void:
 	if not is_instance_valid(current_squad):
 		return
-	current_squad.state_machine.change_state(current_squad.state_machine.states[new_state])
+	current_squad.state_machine.change_state(current_squad.state_machine.states.get(new_state))
 
 ## Mechanic. Instantiate a squad, place it, wire it, announce it.
 func add_squad(scene: PackedScene, where: Vector3) -> Squad:

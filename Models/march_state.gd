@@ -1,22 +1,6 @@
 extends State
 
 
-func enter() -> void:
-	super()
-
-
-
-
-
-
-
-func state_input(event:InputEvent) -> State:
-	return null
-
-func state_update(_delta: float) -> State:
-	return null
-
-
 func state_physics_update(_delta: float) -> State:
 	#if done, don't need to do rest
 	if parent.nav_agent_3d.is_navigation_finished():

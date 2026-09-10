@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WheelOption" format=3 uid="uid://g816j8v5rgs8"]
+
+[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_option.gd" id="1_t51wb"]
+[ext_resource type="Texture2D" uid="uid://drq63jam1mv6x" path="res://Assets/icons/cross-swords.png" id="2_52erv"]
+
+[resource]
+script = ExtResource("1_t51wb")
+slot = 1
+texture = ExtResource("2_52erv")
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"

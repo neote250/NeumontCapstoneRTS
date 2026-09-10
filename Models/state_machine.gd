@@ -6,15 +6,6 @@ signal state_changed(new_state: State)
 
 var current_state:State
 @export var states: Dictionary[GlobalEnums.WHEEL_SLOT, State] = {}
-@onready var parent: Squad = $".."
-
-func _ready() -> void:
-	if states.is_empty():
-		var index: int = 0
-		for child:Node in get_children():
-			if child is State:
-				states[index] = child as State
-				index += 1
 
 func start(first_state: State) -> void:
 	if first_state == null:

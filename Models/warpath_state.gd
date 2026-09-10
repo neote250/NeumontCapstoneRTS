@@ -1,18 +1,8 @@
 extends State
 
 
-func enter() -> void:
-	super()
-
-func exit() -> void:
-	pass
-
-func state_input(event:InputEvent) -> State:
-	return null
-
-func state_update(_delta: float) -> State:
-	return null
-
+func controls_weapons() -> bool:
+	return true
 
 func state_physics_update(_delta: float) -> State:
 	if parent.nav_agent_3d.is_navigation_finished():

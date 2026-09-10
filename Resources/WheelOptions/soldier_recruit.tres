@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WheelOption" format=3 uid="uid://xwmi0h603vdr"]
+
+[ext_resource type="Script" uid="uid://pkqqh6fsa2xq" path="res://UI/wheel_option.gd" id="1_nntbw"]
+[ext_resource type="Texture2D" uid="uid://4cwveasnqjtv" path="res://Assets/icons/war.png" id="2_nntbw"]
+
+[resource]
+script = ExtResource("1_nntbw")
+slot = 4
+texture = ExtResource("2_nntbw")
+metadata/_custom_type_script = "uid://pkqqh6fsa2xq"
