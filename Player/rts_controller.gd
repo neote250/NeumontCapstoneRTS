@@ -43,13 +43,6 @@ var memory_shards: float = 50.0:
 @export var player_id: int = 0
 
 func _ready() -> void:
-	#Squad setup
-	if all_squads.is_empty():
-		var child_nodes:Array[Node] = get_children()
-		for node:Node in child_nodes:
-			if node is Squad:
-				all_squads.append(node)
-	
 	set_active_squad(0)
 	
 	#Camera setup

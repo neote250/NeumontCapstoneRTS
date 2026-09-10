@@ -76,15 +76,11 @@ enum PurchaseResult { OK, SQUAD_FULL, NO_SUCH_BUILD, ALREADY_BUILDING, NO_CONTRO
 func _ready() -> void:
 	##Ensure there is at least 1 unit in the squad
 	if all_units.is_empty():
-		for child: Node in get_children():
-			if child is Unit:
-				all_units.append(child as Unit)
+		all_units.assign(NodeUtil.children_of_type(self, Unit))
 	
 	##Ensure unit spots are properly set
 	if unit_spots.is_empty():
-		for child: Node in get_children():
-			if child is Marker3D:
-				unit_spots.append(child as Marker3D)
+		unit_spots.assign(NodeUtil.children_of_type(self, Marker3D))
 	
 	##Connect default units
 	for unit:Unit in all_units:
@@ -96,14 +92,6 @@ func _ready() -> void:
 		for i:int in range(size_difference):
 			add_unit()
 		
-	
-	if upgrades.is_empty():
-		for child:Node in get_children():
-			if child is Build:
-				upgrades.append(child as Build)
-	
-	##Connect any initial upgrades ####pointless now?
-	
 	
 	state_machine.start(default_state)
 	input_event.connect(_on_input_event)
