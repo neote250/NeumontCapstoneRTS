@@ -51,7 +51,7 @@ func squad_selected(clicked_squad:Squad) -> void:
 	if not is_instance_valid(me.current_squad):
 		return
 	if Teams.is_hostile(me.player_id, clicked_squad.player_id):
-		me.current_squad.set_target(clicked_squad)          # enemy → attack it
+		me.current_squad.targeting.set_target(clicked_squad)          # enemy → attack it
 	elif clicked_squad in me.all_squads:
 		me.set_active_squad(me.all_squads.find(clicked_squad))  # own squad → select it
 

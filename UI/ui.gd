@@ -142,7 +142,7 @@ func _refresh_squad_row(squad: Squad) -> void:
 	var mark: String = "  "
 	if squad.is_building_anything():
 		mark = "▲" if squad.is_build_state_active() else "◦"
-	row.text = "%s %s  (%d)" % [mark, squad.name, squad.all_units.size()]
+	row.text = "%s %s  (%d)" % [mark, squad.name, squad.roster.size()]
 
 const REFUSAL_TEXT: Dictionary = {
 	Squad.PurchaseResult.SQUAD_FULL:      "Squad is at full strength",

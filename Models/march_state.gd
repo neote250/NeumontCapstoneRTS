@@ -1,9 +1,7 @@
 extends State
+## Pack up and move. No shooting — that is what buys the extra speed.
 
-
-func state_physics_update(_delta: float) -> State:
-	#if done, don't need to do rest
-	if parent.nav_agent_3d.is_navigation_finished():
+func state_physics_update(delta: float) -> State:
+	if not parent.movement.advance(delta):
 		return parent.state_machine.states[GlobalEnums.WHEEL_SLOT.DEFAULT]
-	parent.move_to(_delta)
 	return null

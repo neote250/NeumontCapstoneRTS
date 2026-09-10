@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="SquadStats" format=3 uid="uid://dmxmf6lu172by"]
+
+[ext_resource type="Script" uid="uid://cgwg6r04pcfyp" path="res://Models/squad_stats.gd" id="1_a6uh1"]
+[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="2_dsnso"]
+
+[resource]
+script = ExtResource("1_a6uh1")
+metadata/_custom_type_script = "uid://cgwg6r04pcfyp"

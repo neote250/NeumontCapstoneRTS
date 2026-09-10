@@ -2,7 +2,7 @@ extends Node
 class_name State
 
 @export var animation_name: String
-@export var move_speed: float = 400
+@export var move_speed: float = 4
 
 @export var parent: Squad
 

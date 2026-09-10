@@ -1,23 +1,12 @@
 extends State
-
+## Advance under arms. Slower than March, but shoots whatever comes into
+## range on the way — regardless of stance, which is the point of the order.
 
 func controls_weapons() -> bool:
 	return true
 
-func state_physics_update(_delta: float) -> State:
-	if parent.nav_agent_3d.is_navigation_finished():
+func state_physics_update(delta: float) -> State:
+	if not parent.movement.advance(delta):
 		return parent.state_machine.states[GlobalEnums.WHEEL_SLOT.DEFAULT]
-	parent.move_to(_delta)
-	
-	#If target is within range, attack them
-	#otherwise attack closest target within range
-	
-	var closest_squad:Squad = parent.closest_squad_in_range()
-	if closest_squad:
-		parent.set_target(closest_squad)
-		for unit:Unit in parent.all_units:
-			
-			parent.fire_weapon(unit.weapon_component, _delta)
-	else:
-		parent.set_target(null)
+	parent.engage_nearest(delta)
 	return null

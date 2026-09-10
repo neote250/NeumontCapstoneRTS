@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SquadStats" format=3 uid="uid://cjphxrrx3vd23"]
+
+[ext_resource type="Script" uid="uid://cgwg6r04pcfyp" path="res://Models/squad_stats.gd" id="1_h60q3"]
+[ext_resource type="PackedScene" uid="uid://b22aixrgx2s1n" path="res://Models/building.tscn" id="2_h60q3"]
+
+[resource]
+script = ExtResource("1_h60q3")
+speed = 0.0
+unit_scene = ExtResource("2_h60q3")
+spawning_size = 1
+unit_cost = 50
+vision_per_unit = 8.0
+metadata/_custom_type_script = "uid://cgwg6r04pcfyp"

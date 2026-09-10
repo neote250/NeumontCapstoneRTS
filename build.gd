@@ -36,12 +36,12 @@ func _ready() -> void:
 func complete()->bool:
 	match type_of_upgrade:
 		GlobalEnums.UPGRADE_TYPE.BUY_UNIT:
-			return parent.add_unit()
+			return parent.roster.add_unit()
 			
 		GlobalEnums.UPGRADE_TYPE.BUY_SQUAD:
 			return parent.add_squad(squad_type_to_buy)
 		GlobalEnums.UPGRADE_TYPE.GET_WEAPON:
-			return parent.grant_weapon(weapon_to_grant)
+			return parent.roster.grant_weapon(weapon_to_grant)
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_WEAPON:
 		#GlobalEnums.UPGRADE_TYPE.BUY_AMMO:
 		#GlobalEnums.UPGRADE_TYPE.UPGRADE_HEALTH:

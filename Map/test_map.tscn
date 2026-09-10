@@ -195,7 +195,7 @@ metadata/_edit_lock_ = true
 [node name="GameManager" type="Node" parent="." unique_id=613042413 node_paths=PackedStringArray("teams", "wild_squads")]
 script = ExtResource("7_8uw46")
 teams = [NodePath("../Player")]
-wild_squads = [NodePath("../WildSquad"), NodePath("../WildSquad2"), NodePath("../WildSquad3"), NodePath("../WildSquad4"), NodePath("../WildSquad5"), NodePath("../WildSquad7")]
+wild_squads = [NodePath("../WildSquad")]
 
 [node name="Player" type="Node" parent="." unique_id=1017135526 node_paths=PackedStringArray("all_squads")]
 script = ExtResource("4_uf72f")
@@ -242,25 +242,5 @@ transform = Transform3D(-0.999854, 0, -0.0170858, 0, 1, 0, 0.0170858, 0, -0.9998
 controller = NodePath("..")
 
 [node name="WildSquad" parent="." unique_id=419166416 instance=ExtResource("5_lhttk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.527, 0.243382, 176.704)
-player_id = -1
-
-[node name="WildSquad7" parent="." unique_id=1606102332 instance=ExtResource("5_lhttk")]
-transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 164.459, 0.243382, 32.9995)
-player_id = -1
-
-[node name="WildSquad2" parent="." unique_id=2055150818 instance=ExtResource("5_lhttk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 77.6975, 1.52787, 189.283)
-player_id = -1
-
-[node name="WildSquad3" parent="." unique_id=716185529 instance=ExtResource("5_lhttk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.2916, 17.0103, 189.283)
-player_id = -1
-
-[node name="WildSquad5" parent="." unique_id=1314986108 instance=ExtResource("5_lhttk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 31.0677, 17.0103, 196.86)
-player_id = -1
-
-[node name="WildSquad4" parent="." unique_id=2034866666 instance=ExtResource("5_lhttk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.2916, 17.0103, 203.015)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115.527, 0.243382, 192.77019)
 player_id = -1

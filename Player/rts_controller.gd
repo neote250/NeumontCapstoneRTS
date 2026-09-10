@@ -77,7 +77,7 @@ func _input(event: InputEvent) -> void:
 	
 	# Debug get a free unit spawn
 	if event.is_action_pressed("debug_spawn_unit"):
-		current_squad.add_unit()
+		current_squad.roster.add_unit()
 	
 	# Commands for current squad
 	if event.is_action_pressed("target_command"):  # currently left click eventually TOUCH		and current_squad
@@ -188,7 +188,7 @@ func player_click_on_map() -> void:
 	#Check if result is a squad otherwise it is a position (or not a result)
 	
 	if result:
-		current_squad.set_target_position(result.position)
+		current_squad.movement.set_destination(result.position)
 		###DEBUG
 		ui.change_testing_data_text(result.position)
 	else: return
