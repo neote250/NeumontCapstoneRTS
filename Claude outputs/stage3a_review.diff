@@ -1,0 +1,76 @@
+--- a/Player/rts_controller.gd
++++ b/Player/rts_controller.gd
+@@ -23,6 +23,19 @@
+ #endregion
+ 
+ 
++#region ──────────────────────────  configuration  ───────────────────────────
++
++@export_group("Wiring")
++## The place this player is playing on. Read for its terrain, which needs a
++## camera to choose its level of detail.
++## TODO stage 3c: set by the match when it builds this player, not in the
++## inspector.
++@export var map: Map
++@export_group("")
++
++#endregion
++
++
+ #region ─────────────────────────  node references  ──────────────────────────
+ 
+ @onready var camera: Camera3D = $Camera3D
+@@ -73,7 +86,10 @@
+ ## Camera and signal wiring first — none of it depends on a squad being
+ ## selected, so a missing roster must not take it down with it.
+ func _ready() -> void:
+-	$"../NavigationRegion3D/Terrain3D".set_camera(camera)
++	# Terrain3D picks its level of detail from a camera, and this is the only
++	# controller that has one. Asked of the map rather than found by a path
++	# through it, so this scene can be spawned on any map.
++	map.terrain.set_camera(camera)
+ 	ui.state_requested.connect(_on_state_requested)
+ 	super()   # Controller: collect the squads the map placed for this player
+ 
+--- a/Global Scripts/game_manager.gd
++++ b/Global Scripts/match_manager.gd
+@@ -1,9 +1,13 @@
+ extends Node
++class_name MatchManager
+ ## The match. Owns what a hit *means* — score, kill feed, win and loss — as
+ ## opposed to how it was fired. Squads report to it; it never commands them.
+ ##
+ ## The seam: a controller does one player's bookkeeping, this owns the
+ ## consequences that span players.
++##
++## Named MatchManager rather than Match because `match` is a GDScript keyword,
++## and a class one capital away from it makes code and searches ambiguous.
+ 
+ 
+ #region ──────────────────────────  configuration  ───────────────────────────
+--- /dev/null
++++ b/Map/map.gd
+@@ -0,0 +1,23 @@
++extends Node3D
++class_name Map
++## What this place offers, and nothing about who is playing on it. A map that
++## knows no players can serve a 1v1 and a 3v3 without being edited, and the
++## match reads it to build the world.
++##
++## This script goes on the root of a map scene: the map is the map.
++
++
++#region ──────────────────────────  configuration  ───────────────────────────
++
++@export_group("Wiring")
++## The heightmap this place is built on. The local player hands it a camera,
++## which is what Terrain3D uses to decide level of detail.
++@export var terrain: Terrain3D
++@export_group("")
++
++# TODO stage 3b: base_spots — the sites a starting group is dealt onto, and a
++# carried base is placed on.
++# TODO later: build_spots and capture_points, once BuildSpot and CapturePoint
++# are designed (the plan, section 06).
++
++#endregion

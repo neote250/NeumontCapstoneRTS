@@ -1,0 +1,55 @@
+--- a/Map/map.gd
++++ b/Map/map.gd
+@@ -13,10 +13,15 @@
+ ## The heightmap this place is built on. The local player hands it a camera,
+ ## which is what Terrain3D uses to decide level of detail.
+ @export var terrain: Terrain3D
++
++@export_group("Sites")
++## The places a base can stand. At match start they are the deal pool: each
++## player's starting group lands on one, and a dealt spot leaves the pool, so
++## a map needs at least as many spots as the match has players. A carried base
++## is later placed on one of the rest.
++@export var base_spots: Array[Marker3D] = []
+ @export_group("")
+ 
+-# TODO stage 3b: base_spots — the sites a starting group is dealt onto, and a
+-# carried base is placed on.
+ # TODO later: build_spots and capture_points, once BuildSpot and CapturePoint
+ # are designed (the plan, section 06).
+ 
+--- /dev/null
++++ b/Global Scripts/placement.gd
+@@ -0,0 +1,32 @@
++extends RefCounted
++class_name Placement
++## Where several things stand around one point. Static and stateless: the
++## answer depends only on the arguments, so it can be read, reasoned about and
++## reused without owning anything.
++
++
++#region ────────────────────────────  constants  ─────────────────────────────
++
++## Metres between neighbours in a ring. A squad's body is about 7 by 4.5, so
++## this leaves a gap rather than having them touch shoulders.
++const DEFAULT_SPACING: float = 10.0
++
++#endregion
++
++
++#region ──────────────────────────────  rings  ───────────────────────────────
++
++## Where thing number `index` of `count` stands in a ring around `centre`.
++##
++## The radius follows the count rather than being fixed: the circle is made
++## long enough to give every member `spacing` of arc, so two squads stand
++## across from each other and ten stand in a wide circle instead of inside one
++## another. y is the centre's — the ground pass owns height.
++static func ring(centre: Vector3, index: int, count: int, spacing: float = DEFAULT_SPACING) -> Vector3:
++	if count <= 1:
++		return centre
++	var radius: float = maxf(spacing, spacing * count / TAU)
++	var angle: float = TAU * index / count
++	return centre + Vector3(cos(angle) * radius, 0.0, sin(angle) * radius)
++
++#endregion

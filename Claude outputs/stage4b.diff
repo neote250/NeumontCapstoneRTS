@@ -1,0 +1,439 @@
+--- a/Global Scripts/team.gd
++++ b/Global Scripts/team.gd
+@@ -18,8 +18,12 @@
+ ## EconomyComponent._purse(). See the plan, "The purse does not belong to the
+ ## player".
+ var pooled: float = 0.0
+-## PLACEHOLDER: nothing left at all, buildings included. Set by the stage 4 win
+-## check. A player with no squads is spectating, not eliminated.
++## Nothing left at all, buildings included. Maintained by the match whenever a
++## squad dies, and read by the Elimination condition. Terminal: a side with
++## nothing has nobody left to be handed a squad by.
++##
++## A *player* with no squads is spectating, not eliminated — that is a
++## different question, asked of one controller rather than of the side.
+ var eliminated: bool = false
+ # TODO buffs granted at crystals: add Array[TeamBuff] once TeamBuff is designed
+ # (the plan, section 06, "Crystal mechanics").
+@@ -33,3 +37,17 @@
+ 	id = team_id
+ 
+ #endregion
++
++
++#region ─────────────────────────────  queries  ──────────────────────────────
++
++## Does anyone on this side still own a squad? The reason members holds
++## Controllers rather than player ids: the answer is one hop away instead of a
++## lookup through the match.
++func holds_squads() -> bool:
++	for member: Controller in members:
++		if not member.all_squads.is_empty():
++			return true
++	return false
++
++#endregion
+--- a/Global Scripts/match_config.gd
++++ b/Global Scripts/match_config.gd
+@@ -23,9 +23,13 @@
+ ## and "does this hit count?" — see the plan, stage 2. Switching it on today
+ ## would have teammates hunt each other.
+ @export var friendly_fire: bool = false
++## What ends the round. A list, not one: a standard round runs elimination and
++## a clock at once and either can finish it. Checked in order, and the first
++## side named wins, so put the decisive rule first if two could ever answer on
++## the same frame.
++@export var win_conditions: Array[WinCondition] = []
+ @export_group("")
+ 
+-# TODO stage 4: the win conditions this match runs under.
+ # TODO later: which map to load, once something other than the map itself
+ # starts the match.
+ 
+--- a/Global Scripts/match_manager.gd
++++ b/Global Scripts/match_manager.gd
+@@ -10,6 +10,15 @@
+ ## and a class one capital away from it makes code and searches ambiguous.
+ 
+ 
++#region ─────────────────────────────  signals  ──────────────────────────────
++
++## The round is over, and this team won. Emitted once: `winner` latches, so a
++## later condition cannot end an already-ended match.
++signal match_ended(winning_team: int)
++
++#endregion
++
++
+ #region ──────────────────────────  configuration  ───────────────────────────
+ 
+ @export_group("Match")
+@@ -44,6 +53,13 @@
+ ## The seat this machine plays. Clicks and the UI go through it.
+ var local_player: RTSController = null
+ 
++## Seconds since the world was built. Read by any condition that cares about
++## time; accumulated here so every one of them agrees on the number.
++var elapsed: float = 0.0
++## Who won, or NO_TEAM while the round is live. Latches: the first condition to
++## answer is the answer.
++var winner: int = Teams.NO_TEAM
++
+ #endregion
+ 
+ 
+@@ -60,6 +76,20 @@
+ 			register_squad(squad)
+ 		controller.added_squad.connect(register_squad)   # catch runtime squads
+ 
++	# Elimination can only change when a squad dies, so it is checked there.
++	# This covers conditions that turn on time instead. One second rather than
++	# every frame: a full team scan sixty times a second answers a question
++	# that changes maybe twice a match. Built here rather than authored so a
++	# map cannot forget it.
++	var clock: Timer = Timer.new()
++	clock.wait_time = 1.0
++	clock.timeout.connect(_check_win)
++	add_child(clock)
++	clock.start()
++
++func _process(delta: float) -> void:
++	elapsed += delta
++
+ #endregion
+ 
+ 
+@@ -104,6 +134,10 @@
+ 	if local_player.all_squads.is_empty():
+ 		push_error("%s starts with no squads — see the error above." % local_player.name)
+ 		return
++	# The only seat with a screen to show a result on. Connected here rather
++	# than called from _check_win(), so match_ended stays the one announcement
++	# and a score screen or a replay can listen to it on the same terms.
++	match_ended.connect(local_player.end_match)
+ 	local_player.set_active_squad(0)
+ 
+ ## One seat becomes one controller: the local seat gets the scene with the
+@@ -220,12 +254,42 @@
+ 
+ ##the match's consequences: [br]	win/loss check, kill feed, score, death VFX. 
+ ##[br]Can't know which squad a given player has selected.
+-func destroy_squad_cleanup(destroyed_squad:Squad) -> void:
+-	# TODO: kill feed, score, win/loss check
+-	# if player loses all squads and no teammates, player loses the game
+-	# in multiplayer if the player loses all squads the teammates can give that player a squad so that player can rebuild/etc.
+-	# So the player with no squads should probably have a spectate mode
+-	# Spectate mode is also just nice to have as a feature
+-	pass
++func destroy_squad_cleanup(_destroyed_squad: Squad) -> void:
++	# A death is the only thing that can eliminate a side, so both steps happen
++	# here rather than on a poll.
++	_update_elimination()
++	_check_win()
++	# TODO: kill feed, score, death VFX.
++
++#endregion
++
++
++#region ────────────────────────  winning and losing  ────────────────────────
++
++## A side is eliminated when nobody on it owns anything — buildings included,
++## since a building is a squad. Terminal by design: the `continue` means a team
++## that is out stays out, and it is true anyway, because a side with nothing
++## has no teammate left to be handed a squad by.
++##
++## A *player* with no squads is not eliminated, and nothing here says they are.
++## That is spectate mode, and the UI asks all_squads directly.
++func _update_elimination() -> void:
++	for team: Team in teams:
++		if team.eliminated:
++			continue
++		team.eliminated = not team.holds_squads()
++
++## Ask each condition in turn and take the first answer. Latched on `winner`,
++## so the clock firing a moment after an elimination cannot overwrite it.
++func _check_win() -> void:
++	if winner != Teams.NO_TEAM or config == null:
++		return
++	for condition: WinCondition in config.win_conditions:
++		var result: int = condition.check(self)
++		if result == Teams.NO_TEAM:
++			continue
++		winner = result
++		match_ended.emit(winner)
++		return
+ 
+ #endregion
+--- a/Player/controller.gd
++++ b/Player/controller.gd
+@@ -100,6 +100,32 @@
+ 	all_squads.remove_at(i)
+ 	removed_squad.emit(dead_squad)
+ 
++## The non-death twin of _on_squad_terminated(): let go of a squad that is
++## still alive, because it is being handed to someone else. Both paths end in
++## removed_squad, so a listener never has to know which happened — which is
++## what lets the UI treat "no squads left" the same either way.
++func release(squad: Squad) -> void:
++	var i: int = all_squads.find(squad)
++	if i == -1:
++		push_error("%s does not own '%s', so it cannot release it." % [name, squad.name])
++		return
++	squad.squad_terminated.disconnect(_on_squad_terminated)
++	all_squads.remove_at(i)
++	removed_squad.emit(squad)
++
++## Hand a squad to another controller — the teammate rescue.
++##
++## Nothing is copied. SquadStats is shared by reference and every runtime
++## modifier lives on the squad's own nodes, so upgrades travel by staying
++## exactly where they are; adopt() sets controller, and player_id is derived
++## from it, so no third record has to be told. A handover is a change of
++## manager, not a trade.
++func give(squad: Squad, to: Controller) -> void:
++	if to == null or to == self:
++		return
++	release(squad)
++	to.adopt(squad)
++
+ ## Squads the map places itself — wild camps, and whatever else a level author
+ ## stands on the ground — say who owns them through their controller field.
+ ## Collect ours. Searched by group, not by tree, so a squad is found wherever
+--- a/Player/rts_controller.gd
++++ b/Player/rts_controller.gd
+@@ -189,18 +189,42 @@
+ 	set_active_squad(prev_index)
+ 
+ ## Roster bookkeeping first (Controller), then the one thing only a player has:
+-## a selection. If the selected squad died, select whichever squad slid into
+-## its place, or the new last one.
++## a selection.
+ func _on_squad_terminated(dead_squad: Squad) -> void:
+-	var was_selected: bool = dead_squad == current_squad
+ 	var slot: int = current_squad_index        # read before the roster shrinks
+ 	super(dead_squad)
+-	if not was_selected:
++	_reselect_after(dead_squad, slot)
++
++## Giving away the squad you are looking at needs the same fix-up as losing it,
++## or the camera stays on a squad that is no longer yours. Hence the shared
++## method rather than the same four lines twice.
++func release(squad: Squad) -> void:
++	var slot: int = current_squad_index
++	super(squad)
++	_reselect_after(squad, slot)
++
++## The squad at `slot` has just left the roster. If it was the selected one,
++## select whichever squad slid into its place, or the new last one. Silent when
++## the roster is now empty: that is spectate mode, not an error.
++func _reselect_after(lost: Squad, slot: int) -> void:
++	if lost != current_squad:
+ 		return
+ 	current_squad = null
+ 	if not all_squads.is_empty():
+ 		set_active_squad(mini(slot, all_squads.size() - 1))
+ 
++## The round is over. The match tells the local player, and the player tells
++## its own UI — the UI's only channel upward is state_requested, so nothing
++## below reaches past it.
++##
++## Input stops; the camera does not, so the final state stays watchable behind
++## the banner. Squads do keep fighting: a real freeze is get_tree().paused, and
++## every squad scene is PROCESS_MODE_ALWAYS, so that is a pass over process
++## modes rather than one line here.
++func end_match(winning_team: int) -> void:
++	set_process_input(false)
++	ui.show_result(winning_team, winning_team == team_id)
++
+ #endregion
+ 
+ 
+--- a/UI/ui.gd
++++ b/UI/ui.gd
+@@ -48,6 +48,8 @@
+ @onready var toast_label: Label = $CanvasLayer/ToastLabel
+ @onready var toast_timer: Timer = $ToastTimer
+ @onready var testing_data_label: Label = $CanvasLayer/TestingDataLabel
++## One line for whatever the player most needs to know — see _refresh_status().
++@onready var status_label: Label = $CanvasLayer/StatusLabel
+ 
+ ## TODO unused — nothing reads these three. Delete, or wire them up.
+ var current_controlled: Squad
+@@ -67,6 +69,11 @@
+ ## is_connected() on a bound Callable — bind() makes a new object each call.
+ var _watched: Array[Squad] = []
+ 
++## The match result once there is one, "" while the round is live. Stored
++## because it outranks every other status and has no other home to be read
++## from — unlike "am I spectating?", which all_squads already answers.
++var _result_text: String = ""
++
+ #endregion
+ 
+ 
+@@ -89,6 +96,7 @@
+ 	for squad: Squad in owning_player.all_squads:
+ 		_watch_squad(squad)
+ 	_build_squad_rows()
++	_refresh_status()
+ 	set_physics_process(_any_squad_building())
+ 
+ 
+@@ -124,11 +132,13 @@
+ func _on_squad_added(squad: Squad) -> void:
+ 	_watch_squad(squad)
+ 	_build_squad_rows()
++	_refresh_status()
+ 
+ 
+ func _on_squad_removed(squad: Squad) -> void:
+ 	_build_squad_rows()
+ 	_watched.erase(squad)
++	_refresh_status()
+ 
+ #endregion
+ 
+@@ -240,6 +250,32 @@
+ 
+ #endregion
+ 
++
++#region ──────────────────────────────  status  ──────────────────────────────
++
++## The match ended. Told by the controller, which was told by the match.
++func show_result(winning_team: int, we_won: bool) -> void:
++	_result_text = "Victory" if we_won else "Team %d wins" % winning_team
++	_refresh_status()
++
++## One line, by priority: the result outranks everything, because once the
++## round is over "spectating" is no longer the news. Asked of all_squads rather
++## than tracked, so handing a player a squad clears it with no extra wiring.
++##
++## Spectating is deliberately not phrased as defeat. A player with no squads
++## has not lost — a teammate can hand one over, and then this line goes away.
++func _refresh_status() -> void:
++	if not _result_text.is_empty():
++		status_label.text = _result_text
++	elif owning_player.all_squads.is_empty():
++		status_label.text = "Spectating — a teammate can hand you a squad"
++	else:
++		status_label.visible = false
++		return
++	status_label.visible = true
++
++#endregion
++
+ 
+ #region ───────────────────────  resources and toasts  ───────────────────────
+ 
+--- /dev/null
++++ b/Global Scripts/WinConditions/win_condition.gd
+@@ -0,0 +1,26 @@
++extends Resource
++class_name WinCondition
++## Does the round end, and who won? A Resource, like SquadStats: the rule is
++## data a config can hold and a lobby can send, not a branch inside the match.
++## A mode is a list of these.
++##
++## There is no Scripted subclass, though an earlier draft of the plan listed
++## one. A map-authored objective is just another subclass, written next to the
++## map that needs it — the base class already is the extension point, and an
++## empty class named Scripted would add a name without adding a capability.
++
++
++#region ─────────────────────────────  the rule  ─────────────────────────────
++
++## The winning team, or Teams.NO_TEAM to let the round continue. Overridden by
++## every subclass; the base answers "not yet" forever, which is the honest
++## thing for a condition nobody has written a rule into.
++##
++## Takes the whole match rather than a digest of it: a later condition will
++## want something today's two do not, and widening a digest means touching
++## every subclass. MatchManager naming WinCondition while WinCondition names
++## MatchManager is fine — Squad and RosterComponent already do it.
++func check(_m: MatchManager) -> int:
++	return Teams.NO_TEAM
++
++#endregion
+--- /dev/null
++++ b/Global Scripts/WinConditions/elimination.gd
+@@ -0,0 +1,28 @@
++extends WinCondition
++class_name Elimination
++## The last side still holding anything wins. Buildings count, because a
++## building is a squad — so a team reduced to its base is alive, and with
++## income it can rebuild. That is why this is not the only condition in a
++## standard round: without a clock, two turtled teams never finish.
++
++
++#region ─────────────────────────────  the rule  ─────────────────────────────
++
++## Reads Team.eliminated rather than recounting squads. The match maintains
++## that flag when a squad dies, which is the one place that knows a roster
++## just changed.
++func check(m: MatchManager) -> int:
++	var survivor: int = Teams.NO_TEAM
++	var alive: int = 0
++	for team: Team in m.teams:
++		if team.eliminated:
++			continue
++		survivor = team.id
++		alive += 1
++	if alive == 1:
++		return survivor
++	# 0 is a mutual wipe — both last squads died in the same frame. Nobody
++	# earned it, so the round runs on and the clock settles it.
++	return Teams.NO_TEAM
++
++#endregion
+--- /dev/null
++++ b/Global Scripts/WinConditions/timed_capture.gd
+@@ -0,0 +1,48 @@
++extends WinCondition
++class_name TimedCapture
++## The clock. When it runs out the team holding the most crystals wins.
++##
++## A tie is not broken here. The clock exists so a round cannot last forever,
++## not so it hands someone a win they did not earn — so a tie runs on into
++## sudden death, and the next crystal to change hands, or the next team to be
++## wiped out, ends it.
++
++
++#region ──────────────────────────  configuration  ───────────────────────────
++
++@export_group("Tuning")
++## Ten minutes: short enough for mobile, which is what the whole match length
++## is chosen for.
++@export var duration: float = 600.0
++@export_group("")
++
++#endregion
++
++
++#region ─────────────────────────────  the rule  ─────────────────────────────
++
++func check(m: MatchManager) -> int:
++	if m.elapsed < duration:
++		return Teams.NO_TEAM
++
++	var held: Dictionary[int, int] = {}
++	for point: CapturePoint in m.map.capture_points:
++		if point.owner_team == Teams.NO_TEAM:
++			continue                    # nobody has ever taken it
++		held[point.owner_team] = held.get(point.owner_team, 0) + 1
++
++	var leader: int = Teams.NO_TEAM
++	var most: int = 0
++	var tied: bool = false
++	for team_id: int in held:
++		if held[team_id] > most:
++			leader = team_id
++			most = held[team_id]
++			tied = false
++		elif held[team_id] == most:
++			tied = true
++	if tied:
++		return Teams.NO_TEAM            # sudden death, as above
++	return leader                       # NO_TEAM when the map has no crystals held
++
++#endregion

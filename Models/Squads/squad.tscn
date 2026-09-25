@@ -1,47 +1,58 @@
 [gd_scene format=3 uid="uid://1cmfjqxuuyw1"]
 
-[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="1_gqsy5"]
-[ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/squad.gd" id="1_xp1uv"]
-[ext_resource type="Resource" uid="uid://dmxmf6lu172by" path="res://Resources/SquadStats/skeleton_mage.tres" id="2_ilbkq"]
-[ext_resource type="Script" uid="uid://dunqtset5we8u" path="res://Models/state_machine.gd" id="3_5tp08"]
-[ext_resource type="Script" uid="uid://ci2tikap17h05" path="res://ready_state.gd" id="4_svthc"]
-[ext_resource type="Script" uid="uid://55yf50l3tppy" path="res://Models/attack_target_state.gd" id="5_6tmdr"]
-[ext_resource type="Script" uid="uid://cljp2x5idqm8l" path="res://Models/march_state.gd" id="6_l1b2l"]
-[ext_resource type="Script" uid="uid://cvoj802dacdnp" path="res://Models/warpath_state.gd" id="7_2vagg"]
-[ext_resource type="Script" uid="uid://bbspmxw2afix2" path="res://Models/skirmish_state.gd" id="8_8138w"]
-[ext_resource type="Script" uid="uid://5u7duran23mt" path="res://Models/build_state.gd" id="9_6tmdr"]
-[ext_resource type="PackedScene" uid="uid://6igk31dktu27" path="res://build.tscn" id="9_brepm"]
-[ext_resource type="Script" uid="uid://cw0j0kp6pk6uw" path="res://Models/Components/roster_component.gd" id="12_mviqy"]
-[ext_resource type="Script" uid="uid://b27njel4pi03y" path="res://Models/Components/targeting_component.gd" id="13_6q0v1"]
-[ext_resource type="Script" uid="uid://blwqyvsw5f3aq" path="res://Models/Components/movement_component.gd" id="14_yfxbv"]
+[ext_resource type="Script" uid="uid://ba18mg1u1620b" path="res://Models/Squads/squad.gd" id="1_uv3ak"]
+[ext_resource type="Resource" uid="uid://dmxmf6lu172by" path="res://Resources/SquadStats/skeleton_mage.tres" id="2_jtlin"]
+[ext_resource type="Script" uid="uid://cw0j0kp6pk6uw" path="res://Models/Components/roster_component.gd" id="3_jy6ad"]
+[ext_resource type="Script" uid="uid://b27njel4pi03y" path="res://Models/Components/targeting_component.gd" id="4_qpxc7"]
+[ext_resource type="Script" uid="uid://blwqyvsw5f3aq" path="res://Models/Components/movement_component.gd" id="5_5unp1"]
+[ext_resource type="Script" uid="uid://vmhoafrjti70" path="res://Models/Components/economy_component.gd" id="6_ja5v7"]
+[ext_resource type="PackedScene" uid="uid://6igk31dktu27" path="res://Models/Upgrades/build.tscn" id="7_tqrp2"]
+[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/Units/unit.tscn" id="8_nwxbq"]
+[ext_resource type="Script" uid="uid://dunqtset5we8u" path="res://Models/States/state_machine.gd" id="9_hgv45"]
+[ext_resource type="Script" uid="uid://ci2tikap17h05" path="res://Models/States/ready_state.gd" id="10_1n2lb"]
+[ext_resource type="Script" uid="uid://55yf50l3tppy" path="res://Models/States/attack_target_state.gd" id="11_23ryj"]
+[ext_resource type="Script" uid="uid://cljp2x5idqm8l" path="res://Models/States/march_state.gd" id="12_wdrdj"]
+[ext_resource type="Script" uid="uid://cvoj802dacdnp" path="res://Models/States/warpath_state.gd" id="13_krhj0"]
+[ext_resource type="Script" uid="uid://bbspmxw2afix2" path="res://Models/States/skirmish_state.gd" id="14_8b8yd"]
+[ext_resource type="Script" uid="uid://5u7duran23mt" path="res://Models/States/build_state.gd" id="15_glfdd"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_04802"]
 size = Vector3(7.219, 2.8, 4.48)
 
-[node name="Squad" type="CharacterBody3D" unique_id=1992618434 node_paths=PackedStringArray("roster", "targeting", "movement", "upgrades", "state_machine", "default_state")]
+[node name="Squad" type="CharacterBody3D" unique_id=1992618434 node_paths=PackedStringArray("roster", "targeting", "movement", "economy", "state_machine", "default_state")]
 process_mode = 3
 collision_layer = 4
 collision_mask = 4
-script = ExtResource("1_xp1uv")
-stats = ExtResource("2_ilbkq")
+script = ExtResource("1_uv3ak")
+stats = ExtResource("2_jtlin")
 roster = NodePath("Roster")
 targeting = NodePath("Targeting")
 movement = NodePath("Movement")
-upgrades = [NodePath("buy_unit_build")]
+economy = NodePath("Economy")
 state_machine = NodePath("StateMachine")
 default_state = NodePath("StateMachine/ReadyState")
 
 [node name="Roster" type="Node" parent="." unique_id=1521100528]
-script = ExtResource("12_mviqy")
-stats = ExtResource("2_ilbkq")
+script = ExtResource("3_jy6ad")
+stats = ExtResource("2_jtlin")
 
 [node name="Targeting" type="Node" parent="." unique_id=34774685]
-script = ExtResource("13_6q0v1")
+script = ExtResource("4_qpxc7")
 
 [node name="Movement" type="Node" parent="." unique_id=680227096 node_paths=PackedStringArray("nav_agent")]
-script = ExtResource("14_yfxbv")
-stats = ExtResource("2_ilbkq")
+script = ExtResource("5_5unp1")
+stats = ExtResource("2_jtlin")
 nav_agent = NodePath("../NavigationAgent3D")
+
+[node name="Economy" type="Node" parent="." unique_id=2069581927 node_paths=PackedStringArray("upgrades")]
+script = ExtResource("6_ja5v7")
+stats = ExtResource("2_jtlin")
+upgrades = [NodePath("buy_unit_build")]
+
+[node name="buy_unit_build" parent="Economy" unique_id=446418016 node_paths=PackedStringArray("parent") instance=ExtResource("7_tqrp2")]
+parent = NodePath("../..")
+duration = 5.0
+repeatable = true
 
 [node name="CameraMount" type="Node3D" parent="." unique_id=1845245194]
 transform = Transform3D(1, 0, 0, 0, 0.8660258, 0.50000024, 0, -0.50000024, 0.8660258, 0.339889, 4.66579, 6.25614)
@@ -61,7 +72,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5809, 0.0648593, 2.70805)
 [node name="Unit5Spot" type="Marker3D" parent="." unique_id=95660588]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.89916, 0.0648593, 2.70805)
 
-[node name="Unit" parent="." unique_id=1368871638 instance=ExtResource("1_gqsy5")]
+[node name="Unit" parent="." unique_id=1368871638 instance=ExtResource("8_nwxbq")]
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1456003896]
 debug_enabled = true
@@ -75,7 +86,7 @@ debug_color = Color(0.917647, 0, 0.709804, 0)
 debug_fill = false
 
 [node name="StateMachine" type="Node" parent="." unique_id=649850477 node_paths=PackedStringArray("states")]
-script = ExtResource("3_5tp08")
+script = ExtResource("9_hgv45")
 states = {
 0: NodePath("ReadyState"),
 1: NodePath("WarpathState"),
@@ -85,30 +96,25 @@ states = {
 }
 
 [node name="ReadyState" type="Node" parent="StateMachine" unique_id=1756219822 node_paths=PackedStringArray("parent")]
-script = ExtResource("4_svthc")
+script = ExtResource("10_1n2lb")
 parent = NodePath("../..")
 
 [node name="TargetState" type="Node" parent="StateMachine" unique_id=261623139 node_paths=PackedStringArray("parent")]
-script = ExtResource("5_6tmdr")
+script = ExtResource("11_23ryj")
 parent = NodePath("../..")
 
 [node name="MarchState" type="Node" parent="StateMachine" unique_id=1526086349 node_paths=PackedStringArray("parent")]
-script = ExtResource("6_l1b2l")
+script = ExtResource("12_wdrdj")
 parent = NodePath("../..")
 
 [node name="WarpathState" type="Node" parent="StateMachine" unique_id=982883870 node_paths=PackedStringArray("parent")]
-script = ExtResource("7_2vagg")
+script = ExtResource("13_krhj0")
 parent = NodePath("../..")
 
 [node name="SkirmishState" type="Node" parent="StateMachine" unique_id=141258572 node_paths=PackedStringArray("parent")]
-script = ExtResource("8_8138w")
+script = ExtResource("14_8b8yd")
 parent = NodePath("../..")
 
 [node name="BuildState" type="Node" parent="StateMachine" unique_id=1297450734 node_paths=PackedStringArray("parent")]
-script = ExtResource("9_6tmdr")
+script = ExtResource("15_glfdd")
 parent = NodePath("../..")
-
-[node name="buy_unit_build" parent="." unique_id=446418016 node_paths=PackedStringArray("parent") instance=ExtResource("9_brepm")]
-parent = NodePath("..")
-duration = 5.0
-repeatable = true

@@ -6,30 +6,50 @@ extends Node
 ## There is deliberately no `destination` field here — nav_agent.target_position
 ## already is one, and a second copy is the drift this project keeps deleting.
 
+
+#region ──────────────────────────  configuration  ───────────────────────────
+
+@export_group("Wiring")
 @export var stats: SquadStats
 @export var nav_agent: NavigationAgent3D
+@export_group("")
+
+#endregion
+
+
+#region ──────────────────────────────  state  ───────────────────────────────
 
 var _squad: Squad
 var _ground_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
 
+#endregion
+
+
+#region ────────────────────────────  lifecycle  ─────────────────────────────
 
 func _ready() -> void:
 	_squad = get_parent() as Squad
 
+#endregion
+
+
+#region ───────────────────────────  destination  ────────────────────────────
 
 func set_destination(where: Vector3) -> void:
 	nav_agent.target_position = where
 
-
 func is_arrived() -> bool:
 	return nav_agent.is_navigation_finished()
-
 
 ## Halt where we stand. Clearing the target is Squad's call, not ours.
 func stop() -> void:
 	nav_agent.target_position = _squad.global_position
 	_squad.velocity = Vector3.ZERO
 
+#endregion
+
+
+#region ─────────────────────────────  steering  ─────────────────────────────
 
 ## Step along the nav path. Returns false once the destination is reached, so
 ## each state decides for itself what "arrived" means.
@@ -38,7 +58,6 @@ func advance(delta: float) -> bool:
 		return false
 	step(delta)
 	return true
-
 
 ## One physics frame of steering toward the next path point, facing that way.
 ## TODO delta is unused: turn_smoothing is applied per frame, so acceleration
@@ -59,6 +78,12 @@ func step(_delta: float) -> void:
 	_squad.velocity.z = lerp(_squad.velocity.z, desired.z, stats.turn_smoothing)
 	_squad.move_and_slide()
 
+#endregion
+
+
+#region ──────────────────────────────  ground  ──────────────────────────────
 
 func snap_to_ground() -> void:
 	Ground.snap(_squad, _ground_query)
+
+#endregion

@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://dvvt61dd5e6ae"]
+
+[ext_resource type="Script" uid="uid://bw06xtofvfhh6" path="res://Player/rts_controller.gd" id="1_btcbx"]
+[ext_resource type="PackedScene" uid="uid://cg2r12q47xhbd" path="res://UI/ui.tscn" id="2_gwnis"]
+[ext_resource type="PackedScene" uid="uid://bve0fqe41rqsl" path="res://UI/move_marker.tscn" id="3_k53q1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uf72f"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.666296, 0.41713, 0.478861, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_size = 6
+
+[node name="Player" type="Node" unique_id=445925779 node_paths=PackedStringArray("squads_root")]
+script = ExtResource("1_btcbx")
+team_id = 0
+squads_root = NodePath("")
+
+[node name="UI" parent="." unique_id=2052029974 node_paths=PackedStringArray("owning_player") instance=ExtResource("2_gwnis")]
+owning_player = NodePath("..")
+
+[node name="MinimapContainer" type="PanelContainer" parent="." unique_id=2076390449]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -256.0
+offset_bottom = 256.0
+grow_horizontal = 0
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uf72f")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="MinimapContainer" unique_id=1611372017]
+layout_mode = 2
+
+[node name="Minimap" type="SubViewport" parent="MinimapContainer/SubViewportContainer" unique_id=1288364500]
+handle_input_locally = false
+size = Vector2i(256, 256)
+render_target_update_mode = 4
+
+[node name="Camera3D" type="Camera3D" parent="MinimapContainer/SubViewportContainer/Minimap" unique_id=1468586158]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 124, 160, 125)
+
+[node name="MoveMarker" parent="MinimapContainer/SubViewportContainer/Minimap" unique_id=1789034898 instance=ExtResource("3_k53q1")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 115.687, 18.1929, 108.346)
+visible = false
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1222993143]
+cull_mask = 1048571

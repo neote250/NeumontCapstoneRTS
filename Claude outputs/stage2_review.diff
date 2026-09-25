@@ -1,0 +1,212 @@
+--- a/Player/controller.gd
++++ b/Player/controller.gd
+@@ -23,6 +23,10 @@
+ @export_group("Ownership")
+ ## Which player this is. Teams.NEUTRAL (-1) on the NeutralController.
+ @export var player_id: int = 0
++## Which side this player is on. Players on the same team never target each
++## other. Every player needs one; only the NeutralController stays on NO_TEAM.
++## TODO stage 3: set by the match from MatchConfig, not in the inspector.
++@export var team_id: int = Teams.NO_TEAM
+ 
+ @export_group("Wiring")
+ ## Where squads this controller spawns are placed in the world. Custody only:
+--- a/Player/neutral_controller.gd
++++ b/Player/neutral_controller.gd
+@@ -8,10 +8,13 @@
+ #region ────────────────────────────  lifecycle  ─────────────────────────────
+ 
+ func _ready() -> void:
+-	# Neutral is the one thing this node is. Any other id would quietly make
+-	# every wild squad an ally of that player, so name the mistake instead.
++	# Neutral, on no team, is the one thing this node is. A wrong Player Id
++	# would quietly ally the wild squads with that player, and a Team Id would
++	# be silently ignored, so name either mistake instead.
+ 	if player_id != Teams.NEUTRAL:
+ 		push_error("%s has Player Id %d — a NeutralController must be %d." % [name, player_id, Teams.NEUTRAL])
++	if team_id != Teams.NO_TEAM:
++		push_error("%s has Team Id %d — a NeutralController is on no team." % [name, team_id])
+ 	super()
+ 
+ #endregion
+--- a/Global Scripts/teams.gd
++++ b/Global Scripts/teams.gd
+@@ -1,15 +1,55 @@
+ extends RefCounted
+ class_name Teams
++## The rules for who fights whom. Static, and no nodes: the one piece of state
++## is the player → team lookup the match fills once at startup.
+ 
++
++#region ────────────────────────────  constants  ─────────────────────────────
++
++## player_id of the NeutralController, and so of every wild squad.
+ const NEUTRAL: int = -1
++## team_id of a controller on no team. Only the NeutralController.
++const NO_TEAM: int = -1
++
++#endregion
++
+ 
+-## Global toggle — flip for a "friendly fire on" match rule.
++#region ──────────────────────────────  state  ───────────────────────────────
++
++## Keep false for now. is_hostile() answers both "pick this as a target?" and
++## "does this hit count?", so switching it on would have teammates hunt each
++## other. Friendly fire needs those two questions split first.
+ static var friendly_fire: bool = false
+ 
+-## 	May A attack B? — used by targeting and the damage guard
++## player_id → team id. Flat because it is read on every targeting scan.
++## Written only by set_roster().
++static var _team_of: Dictionary[int, int] = {}
++
++#endregion
++
++
++#region ──────────────────────────────  roster  ──────────────────────────────
++
++## Replace the lookup with the match's. Cleared first: static state outlives a
++## scene reload, so a restarted match would otherwise keep the old sides.
++## Takes plain ids, so these rules never depend on Team or Controller.
++static func set_roster(team_of: Dictionary[int, int]) -> void:
++	_team_of.clear()
++	_team_of.merge(team_of)
++
++#endregion
++
++
++#region ────────────────────────────  hostility  ─────────────────────────────
++
++## May A attack B? Used by targeting, clicks, and the damage guard.
++## No fallback for a player missing from the lookup: a guessed team can collide
++## with a real one, and the GameManager already named any unassigned player.
+ static func is_hostile(attacker_id: int, target_id: int) -> bool:
+-	if attacker_id == target_id:
+-		return friendly_fire          # same team
+-	if attacker_id == NEUTRAL and target_id == NEUTRAL:
+-		return false                  # neutrals ignore each other
++	if attacker_id == NEUTRAL or target_id == NEUTRAL:
++		return attacker_id != target_id      # neutrals fight everyone but each other
++	if _team_of[attacker_id] == _team_of[target_id]:
++		return friendly_fire                 # same side
+ 	return true
++
++#endregion
+--- a/Global Scripts/game_manager.gd
++++ b/Global Scripts/game_manager.gd
+@@ -20,9 +20,19 @@
+ #endregion
+ 
+ 
++#region ──────────────────────────────  state  ───────────────────────────────
++
++## The sides in this match, built once at startup from the controllers.
++var teams: Array[Team] = []
++
++#endregion
++
++
+ #region ────────────────────────────  lifecycle  ─────────────────────────────
+ 
+ func _ready() -> void:
++	_build_teams()           # before anything can ask who is hostile to whom
++
+ 	# Controllers may be ready before or after this node. Squads they already
+ 	# adopted are registered here; every later one arrives through the signal.
+ 	for controller: Controller in controllers:
+@@ -32,6 +42,34 @@
+ 
+ #endregion
+ 
++
++#region ──────────────────────────────  teams  ───────────────────────────────
++
++## Group every player into its Team, then give Teams the lookup that hostility
++## checks read. Names each wiring mistake rather than guessing past it.
++## TODO stage 3: the match builds these from MatchConfig, not the inspector.
++func _build_teams() -> void:
++	var by_id: Dictionary[int, Team] = {}
++	var team_of: Dictionary[int, int] = {}              # player_id → team id
++	var seen: Dictionary[int, Controller] = {}
++	for controller: Controller in controllers:
++		if controller.player_id == Teams.NEUTRAL:
++			continue                        # neutrals are on no team
++		if seen.has(controller.player_id):
++			push_error("%s and %s share Player Id %d. Every player needs its own." % [seen[controller.player_id].name, controller.name, controller.player_id])
++		seen[controller.player_id] = controller
++		if controller.team_id == Teams.NO_TEAM:
++			push_error("%s has no Team Id. Every player must be on a team." % controller.name)
++			continue
++		team_of[controller.player_id] = controller.team_id
++		if not by_id.has(controller.team_id):
++			by_id[controller.team_id] = Team.new(controller.team_id)
++		by_id[controller.team_id].members.append(controller)
++	teams.assign(by_id.values())
++	Teams.set_roster(team_of)
++
++#endregion
++
+ 
+ #region ───────────────────────────  registration  ───────────────────────────
+ 
+--- a/README.md
++++ b/README.md
+@@ -96,8 +96,8 @@
+ |---|---|
+ | One hardcoded player, squads placed in the map scene | working |
+ | Squad purchase at a building, spawned nearby | working |
+-| Wild squads | working, but hostility is per-player, not per-team |
+-| Teams (3v3, AI sides) | **not built** — `Teams.is_hostile()` is `a != b`, so teammates would shoot each other |
++| Wild squads | working — owned by a `NeutralController`, hostile to every team |
++| Teams | working — each controller's **Team Id** in the inspector until `MatchConfig` exists; teammates never target each other. AI sides and friendly fire **not built** |
+ | Variable player count, dealt base spots | **not built** — the map authors the match |
+ | Crystal capture points, the ten-minute clock, win conditions | **not built** |
+ | Gifting, spectating, elimination | **not built** |
+@@ -122,7 +122,7 @@
+ | **Squad** | `Squad` (CharacterBody3D) | Identity and orchestration. Holds four components and a state machine. This is what the player commands. |
+ | **Unit** | `Unit` (Node3D) | Nothing. A mesh plus components. **A building is a squad of size 1** whose "unit" is a gravestone. |
+ | **Component** | `HealthComponent`, `WeaponComponent`, `Attack` | One stat block each. |
+-| **Rules** | `Teams`, `Combat` | Static only, no nodes, no state. `Teams.is_hostile()` answers *may A attack B*; `Combat.resolve()` answers *how much does it hurt*. |
++| **Rules** | `Teams`, `Combat` | Static, no nodes. `Teams` keeps one lookup — player → team — which the match fills at startup. `Teams.is_hostile()` answers *may A attack B*; `Combat.resolve()` answers *how much does it hurt*. |
+ 
+ A squad is a physics body carrying its units as children. Move the squad and the units follow — units have no movement code at all. That reuse is why your home base and your infantry share one targeting, damage and upgrade path.
+ 
+--- /dev/null
++++ b/Global Scripts/team.gd
+@@ -0,0 +1,35 @@
++extends RefCounted
++class_name Team
++## One side of the match: which players are on it, and the state that belongs
++## to the side rather than to any one player. Built by the GameManager at
++## startup. Hostility checks read Teams' flat lookup, not this, so the damage
++## path never walks a list.
++
++
++#region ──────────────────────────────  state  ───────────────────────────────
++
++var id: int
++## The players on this side. Controllers rather than player ids, so a question
++## like "does anyone on this team still own a squad?" can be asked directly.
++var members: Array[Controller] = []
++
++## PLACEHOLDER: the team's shared basic currency. Nothing reads it yet; the
++## purse is still RTSController.memory_shards, reached only through
++## EconomyComponent._purse(). See the plan, "The purse does not belong to the
++## player".
++var pooled: float = 0.0
++## PLACEHOLDER: nothing left at all, buildings included. Set by the stage 4 win
++## check. A player with no squads is spectating, not eliminated.
++var eliminated: bool = false
++# TODO buffs granted at crystals: add Array[TeamBuff] once TeamBuff is designed
++# (the plan, section 06, "Crystal mechanics").
++
++#endregion
++
++
++#region ────────────────────────────  lifecycle  ─────────────────────────────
++
++func _init(team_id: int) -> void:
++	id = team_id
++
++#endregion

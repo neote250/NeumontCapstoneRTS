@@ -1,0 +1,324 @@
+--- a/Map/map.gd
++++ b/Map/map.gd
+@@ -13,6 +13,9 @@
+ ## The heightmap this place is built on. The local player hands it a camera,
+ ## which is what Terrain3D uses to decide level of detail.
+ @export var terrain: Terrain3D
++## Where squads stand in the world. The match hands it to every controller it
++## builds, so custody belongs to the place rather than to any player.
++@export var squads_root: Node
+ 
+ @export_group("Sites")
+ ## The places a base can stand. At match start they are the deal pool: each
+@@ -26,3 +29,17 @@
+ # are designed (the plan, section 06).
+ 
+ #endregion
++
++
++#region ──────────────────────────────  ground  ──────────────────────────────
++
++## How high the ground is at `where`, or NAN where this map has no terrain.
++##
++## Asked of the heightmap rather than cast for: while the match builds its
++## world nothing has stepped the physics space yet, so a ray would find
++## nothing. It also means a base spot can be authored at any height — the
++## marker says where, the terrain says how high.
++func height_at(where: Vector3) -> float:
++	return terrain.data.get_height(where)
++
++#endregion
+--- a/Player/controller.gd
++++ b/Player/controller.gd
+@@ -31,7 +31,8 @@
+ @export_group("Wiring")
+ ## Where squads this controller spawns are placed in the world. Custody only:
+ ## ownership is each squad's controller field, and squads are found through
+-## Squad.GROUP, so where a squad sits never decides whose it is.
++## Squad.GROUP, so where a squad sits never decides whose it is. Set by the
++## match for the players it builds; authored for the map's own controllers.
+ @export var squads_root: Node
+ @export_group("")
+ 
+@@ -86,10 +87,11 @@
+ 	all_squads.remove_at(i)
+ 	removed_squad.emit(dead_squad)
+ 
+-## Squads hand-placed in the map say who owns them through their controller
+-## field. Collect ours. Searched by group, not by tree, so a squad is found
+-## wherever it sits.
+-## TODO stage 3: delete. The match spawns every squad through add_squad().
++## Squads the map places itself — wild camps, and whatever else a level author
++## stands on the ground — say who owns them through their controller field.
++## Collect ours. Searched by group, not by tree, so a squad is found wherever
++## it sits. A player's squads do not come this way: the match spawns them
++## through add_squad(), so for a player this finds nothing.
+ func _adopt_placed_squads() -> void:
+ 	for node: Node in get_tree().get_nodes_in_group(Squad.GROUP):
+ 		var squad: Squad = node as Squad
+--- a/Player/rts_controller.gd
++++ b/Player/rts_controller.gd
+@@ -86,30 +86,21 @@
+ 
+ #region ────────────────────────────  lifecycle  ─────────────────────────────
+ 
+-## Camera and signal wiring first — none of it depends on a squad being
+-## selected, so a missing roster must not take it down with it.
++## Camera and signal wiring only. Nothing here depends on owning a squad:
++## this player is built before it has any, and the match hands them over.
+ func _ready() -> void:
+ 	# Terrain3D picks its level of detail from a camera, and this is the only
+ 	# controller that has one. Asked of the map rather than found by a path
+ 	# through it, so this scene can be spawned on any map.
+ 	map.terrain.set_camera(camera)
+ 	ui.state_requested.connect(_on_state_requested)
+-	super()   # Controller: collect the squads the map placed for this player
++	super()   # Controller: collect any squads the map placed for this player
+ 
+-	# An empty roster is a scene wiring mistake, not a runtime condition. Name
+-	# it — "index 0 out of bounds" does not tell you which node to go look at.
+-	# TODO stage 3: the match spawns the squads and selects one, so this guard
+-	# goes away and an empty roster at _ready() becomes the normal case.
+-	if all_squads.is_empty():
+-		push_error("%s owns no squads. Point a squad's Controller at this node in the inspector." % name)
+-		return
+-	# Reads the squad's @onready camera_mount, so every squad must already be
+-	# ready: the Squads container has to sit above this node in the scene tree.
+-	# TODO stage 3: goes away with the guard above.
+-	set_active_squad(0)
+-	# Nothing sets the camera transform here on purpose: set_active_squad()
+-	# already called update_camera_target(), and _snap_next_frame has
+-	# _process() overwrite it on frame one regardless.
++	# An empty roster is the normal state here — stage 0's guard is gone with
++	# the hand-placed squads it was guarding. The match spawns this player's
++	# starting group and then calls set_active_squad(), which is also what
++	# points the camera; _snap_next_frame has _process() cut to it on the
++	# first frame after that.
+ 
+ func _input(event: InputEvent) -> void:
+ 	# Squad-independent commands first.
+--- a/Global Scripts/match_manager.gd
++++ b/Global Scripts/match_manager.gd
+@@ -12,13 +12,23 @@
+ 
+ #region ──────────────────────────  configuration  ───────────────────────────
+ 
+-@export_group("Players")
+-## Every owner of squads in the match: each player's RTSController, and the
+-## map's NeutralController. One kind of thing to iterate, no special cases.
+-@export var controllers: Array[Controller]
+-## Which controller receives local input. One client, one local player —
+-## in networked play this is the controller this client owns.
+-@export var local_player_index: int = 0
++@export_group("Match")
++## What the lobby decided: the seats, their sides, and the rules. A preset
++## .tres until there is a lobby to build one.
++@export var config: MatchConfig
++## Which seat this machine plays. The config is identical on every machine in
++## networked play; this is the line that differs between them.
++@export var local_player_id: int = 0
++## Built for the local seat only — a controller with a camera, a UI and a
++## minimap. Every other seat is a plain Controller, which needs no scene.
++@export var player_scene: PackedScene
++
++@export_group("Wiring")
++## The place being played on: the spots to deal, and the ground to stand on.
++@export var map: Map
++## The map's own neutral owner. Wild camps are level design, so the match does
++## not build them — it registers them alongside the players it did build.
++@export var neutral: NeutralController
+ @export_group("")
+ 
+ #endregion
+@@ -26,8 +36,13 @@
+ 
+ #region ──────────────────────────────  state  ───────────────────────────────
+ 
+-## The sides in this match, built once at startup from the controllers.
++## Every owner of squads in this match: the players built from the config, and
++## the map's neutral. Built once, at startup.
++var controllers: Array[Controller] = []
++## The sides, built from the same config.
+ var teams: Array[Team] = []
++## The seat this machine plays. Clicks and the UI go through it.
++var local_player: RTSController = null
+ 
+ #endregion
+ 
+@@ -35,10 +50,11 @@
+ #region ────────────────────────────  lifecycle  ─────────────────────────────
+ 
+ func _ready() -> void:
++	_build_world()           # the players, and the squads they start with
+ 	_build_teams()           # before anything can ask who is hostile to whom
+ 
+-	# Controllers may be ready before or after this node. Squads they already
+-	# adopted are registered here; every later one arrives through the signal.
++	# Squads that already exist — the starting groups, and the map's own
++	# neutrals — are registered here; every later one arrives through the signal.
+ 	for controller: Controller in controllers:
+ 		for squad: Squad in controller.all_squads:
+ 			register_squad(squad)
+@@ -47,11 +63,89 @@
+ #endregion
+ 
+ 
++#region ────────────────────────  building the world  ────────────────────────
++
++## Build the match this map is hosting: one controller per seat in the config,
++## each dealt a base spot with its starting group standing on it. The map's own
++## squads are left alone — it keeps its neutrals.
++## The order matters: everything a controller needs is set before it is added
++## to the tree, because add_child() is when its _ready() runs.
++func _build_world() -> void:
++	if config == null:
++		push_error("%s has no Match Config. There is no match to build." % name)
++		return
++	if map == null:
++		push_error("%s has no Map. There is nowhere to build the match." % name)
++		return
++	var spots: Array[Marker3D] = map.base_spots.duplicate()
++	if spots.size() < config.players.size():
++		push_error("%s offers %d base spots for %d players." % [map.name, spots.size(), config.players.size()])
++		return
++	spots.shuffle()                       # dealt without replacement, below
++
++	Teams.friendly_fire = config.friendly_fire
++	for seat: PlayerSetup in config.players:
++		var controller: Controller = _build_controller(seat)
++		if controller == null:
++			return                        # already named; a half-built match helps nobody
++		controllers.append(controller)
++		var spot: Marker3D = spots.pop_back()
++		_spawn_starting_group(controller, spot)
++
++	if neutral != null:
++		controllers.append(neutral)       # in the map already, holding its own squads
++
++	if local_player == null:
++		push_error("No seat has Player Id %d, so this machine has nobody to play." % local_player_id)
++		return
++	# Guarded rather than assumed: _spawn_starting_group() gives up on a spot
++	# it cannot stand on, and "index 0 out of bounds" would bury the error that
++	# actually matters.
++	if local_player.all_squads.is_empty():
++		push_error("%s starts with no squads — see the error above." % local_player.name)
++		return
++	local_player.set_active_squad(0)
++
++## One seat becomes one controller: the local seat gets the scene with the
++## hands on it, every other seat a bare Controller, which is all an absent or
++## remote player needs.
++func _build_controller(seat: PlayerSetup) -> Controller:
++	var controller: Controller
++	if seat.player_id == local_player_id:
++		local_player = player_scene.instantiate() as RTSController
++		if local_player == null:
++			push_error("Player Scene is not a scene whose root is an RTSController.")
++			return null
++		local_player.map = map            # before add_child: _ready() reads it
++		controller = local_player
++	else:
++		controller = Controller.new()
++	controller.name = "Player%d" % seat.player_id
++	controller.player_id = seat.player_id
++	controller.team_id = seat.team_id
++	controller.squads_root = map.squads_root
++	add_child(controller)
++	return controller
++
++## The starting group lands in a ring on its spot rather than on the point
++## itself, or the squads would spawn inside one another. Each is placed at the
++## ground's height where it actually stands, since a ring crosses a slope.
++func _spawn_starting_group(controller: Controller, spot: Marker3D) -> void:
++	for i: int in config.starting_group.size():
++		var at: Vector3 = Placement.ring(spot.global_position, i, config.starting_group.size())
++		at.y = map.height_at(at)
++		if is_nan(at.y):
++			push_error("%s is off the terrain — no ground at %v." % [spot.name, at])
++			return
++		controller.add_squad(config.starting_group[i], at)
++
++#endregion
++
++
+ #region ──────────────────────────────  teams  ───────────────────────────────
+ 
+ ## Group every player into its Team, then give Teams the lookup that hostility
+ ## checks read. Names each wiring mistake rather than guessing past it.
+-## TODO stage 3: the match builds these from MatchConfig, not the inspector.
+ func _build_teams() -> void:
+ 	var by_id: Dictionary[int, Team] = {}
+ 	var team_of: Dictionary[int, int] = {}              # player_id → team id
+@@ -111,7 +205,7 @@
+ func squad_selected(clicked_squad:Squad) -> void:
+ 	if not is_instance_valid(clicked_squad):
+ 		return
+-	var me: RTSController = controllers[local_player_index] as RTSController
++	var me: RTSController = local_player
+ 	if not is_instance_valid(me.current_squad):
+ 		return
+ 	if Teams.is_hostile(me.player_id, clicked_squad.player_id):
+--- /dev/null
++++ b/Global Scripts/player_setup.gd
+@@ -0,0 +1,25 @@
++extends Resource
++class_name PlayerSetup
++## One seat in the match: who a player is and which side they are on. Pure
++## data — the match turns each of these into a controller.
++
++
++#region ────────────────────────────  constants  ─────────────────────────────
++
++## What plays this seat. A human seat is played from a machine; an AI seat will
++## get a brain node once one exists.
++enum KIND { HUMAN, AI }
++
++#endregion
++
++
++#region ──────────────────────────  configuration  ───────────────────────────
++
++@export var player_id: int = 0
++@export var team_id: int = 0
++## Unread for now — every seat that is not this machine's local player is built
++## as a plain Controller either way, and simply does nothing.
++## TODO give an AI seat its brain node when there is one to give.
++@export var kind: KIND = KIND.HUMAN
++
++#endregion
+--- /dev/null
++++ b/Global Scripts/match_config.gd
+@@ -0,0 +1,32 @@
++extends Resource
++class_name MatchConfig
++## What the lobby decided: who is playing, on which sides, and under what
++## rules. Pure data with no nodes, which is what makes it the thing to send
++## over a wire at match start, and the thing a story map ships as a preset.
++##
++## It says nothing about which seat is yours: the same config runs on every
++## machine, and MatchManager.local_player_id is what differs between them.
++
++
++#region ──────────────────────────  configuration  ───────────────────────────
++
++@export_group("Seats")
++@export var players: Array[PlayerSetup] = []
++
++@export_group("Rules")
++## The squads every player starts with, spawned as a group on the base spot
++## they were dealt.
++## TODO per-seat starting groups, once a mode wants asymmetric starts.
++@export var starting_group: Array[PackedScene] = []
++## Read into Teams at startup.
++## TODO leave this false until is_hostile() is split into "pick as a target?"
++## and "does this hit count?" — see the plan, stage 2. Switching it on today
++## would have teammates hunt each other.
++@export var friendly_fire: bool = false
++@export_group("")
++
++# TODO stage 4: the win conditions this match runs under.
++# TODO later: which map to load, once something other than the map itself
++# starts the match.
++
++#endregion

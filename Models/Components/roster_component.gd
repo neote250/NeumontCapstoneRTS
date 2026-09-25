@@ -4,6 +4,9 @@ extends Node
 ## Anything that operates on the units lives here; anything that operates on
 ## the squad as a whole stays on Squad.
 
+
+#region ─────────────────────────────  signals  ──────────────────────────────
+
 ## The roster changed size. Squad re-emits this as its own roster_changed(self),
 ## so the UI stays coupled to Squad rather than reaching into this component.
 signal changed(size: int)
@@ -11,21 +14,52 @@ signal changed(size: int)
 ## its own parent is a component you cannot reuse.
 signal emptied
 
+#endregion
+
+
+#region ────────────────────────────  constants  ─────────────────────────────
+
+## How close a unit must be to its slot before it stops nudging toward it.
 const ARRIVAL_THRESHOLD: float = 0.05
 
+#endregion
+
+
+#region ──────────────────────────  configuration  ───────────────────────────
+
+@export_group("Wiring")
 @export var stats: SquadStats
+
+@export_group("Contents")
+## Left empty in both squad scenes and discovered in _ready() — the units and
+## markers are authored on the squad, not on this node.
 @export var all_units: Array[Unit] = []
 @export var unit_spots: Array[Marker3D] = []
+@export_group("")
+
+#endregion
+
+
+#region ──────────────────────────────  state  ───────────────────────────────
 
 #region runtime modifiers — granted by upgrades, live here not on the resource
 ## Extra roster slots from upgrades. stats.max_squad_size is the base.
 var size_bonus: int = 0
+## Extra crystal per unit per second from upgrades. stats.capture_weight is
+## the base. Nothing grants it yet; the field exists so the buff has a home
+## the day a crystal or a building hands one out.
+var capture_weight_bonus: float = 0.0
 #endregion
 
 var _squad: Squad
 var _ground_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.new()
+## Which unit gets its ground raycast this frame. One per frame, round-robin.
 var _stagger: int = 0
 
+#endregion
+
+
+#region ────────────────────────────  lifecycle  ─────────────────────────────
 
 func _ready() -> void:
 	_squad = get_parent() as Squad
@@ -45,7 +79,6 @@ func _ready() -> void:
 	# is refused. Squad calls spawn_to_size() from its own _ready(), by which
 	# point Godot has lifted the block.
 
-
 ## Fill the roster out to its starting size. Called by Squad._ready(), not from
 ## our own _ready() — see the note above. add_unit() refuses past max_size(),
 ## so a spawning_size above the cap quietly yields the cap.
@@ -56,28 +89,33 @@ func spawn_to_size() -> void:
 
 #region queries
 
+#endregion
+
+
+#region ─────────────────────────────  queries  ──────────────────────────────
+
 func size() -> int:
 	return all_units.size()
 
-
 func is_empty() -> bool:
 	return all_units.is_empty()
-
 
 ## Base allowance plus anything upgrades have granted.
 func max_size() -> int:
 	return stats.max_squad_size + size_bonus
 
+## How fast this squad takes a crystal: weight per unit, times units alive.
+## Read by CapturePoint, which knows nothing about squads beyond this number.
+func capture_rate() -> float:
+	return (stats.capture_weight + capture_weight_bonus) * size()
 
 ## mini() keeps the authored spot count authoritative — an upgrade raises the
 ## player-facing permission, never the number of markers the scene has.
 func has_room() -> bool:
 	return all_units.size() < mini(max_size(), unit_spots.size())
 
-
 func random_unit() -> Unit:
 	return all_units[randi() % all_units.size()]
-
 
 ## The attack the squad's range checks are measured with. Unit 1 speaks for all.
 func current_attack() -> Attack:
@@ -89,6 +127,11 @@ func current_attack() -> Attack:
 
 
 #region membership
+
+#endregion
+
+
+#region ────────────────────────────  membership  ────────────────────────────
 
 ## A mechanic, not a purchase. Build.complete(), _ready() and the debug hotkey
 ## all land here. Never touches shards.
@@ -106,14 +149,12 @@ func add_unit() -> bool:
 	changed.emit(all_units.size())
 	return true
 
-
 func remove_unit(unit: Unit) -> void:
 	all_units.erase(unit)
 	unit.queue_free()
 	changed.emit(all_units.size())
 	if all_units.is_empty():
 		emptied.emit()
-
 
 func grant_weapon(attack_scene: PackedScene) -> bool:
 	if attack_scene == null or all_units.is_empty():
@@ -126,14 +167,6 @@ func grant_weapon(attack_scene: PackedScene) -> bool:
 			unit.weapon_component.current_attack = atk
 	return true
 
-
-## Every unit takes a shot with whatever it is holding.
-## TODO call the connected firing animation from here.
-func fire_all(delta: float) -> void:
-	for unit: Unit in all_units:
-		unit.weapon_component.damage_target(delta)
-
-
 func _connect(unit: Unit) -> void:
 	unit.health_component.died.connect(remove_unit)
 	unit.weapon_component.deal_damage.connect(_squad.on_damage_dealt)
@@ -142,6 +175,22 @@ func _connect(unit: Unit) -> void:
 
 
 #region placement — called from Squad._physics_process, in order
+
+#endregion
+
+
+#region ──────────────────────────────  combat  ──────────────────────────────
+
+## Every unit takes a shot with whatever it is holding.
+## TODO call the connected firing animation from here.
+func fire_all(delta: float) -> void:
+	for unit: Unit in all_units:
+		unit.weapon_component.damage_target(delta)
+
+#endregion
+
+
+#region ────────────────────────────  placement  ─────────────────────────────
 
 ## Step each unit toward its formation slot. Local space, x and z only:
 ## snap_to_ground() owns y, and mixing them fights over one axis.
@@ -163,12 +212,13 @@ func align_to_slots(delta: float) -> void:
 		unit.position.x += step.x
 		unit.position.z += step.z
 
-
 ## One unit per physics frame — a 5-unit squad fully refreshes 12x/second.
 func snap_to_ground() -> void:
 	if stats.is_flying or all_units.is_empty():
 		return
 	_stagger = (_stagger + 1) % all_units.size()
 	Ground.snap(all_units[_stagger], _ground_query)
+
+#endregion
 
 #endregion

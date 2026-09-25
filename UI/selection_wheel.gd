@@ -1,34 +1,82 @@
 @tool
 extends Control
 class_name SelectionWheel
+## The radial order menu. Held open on a button, committed on release: close()
+## returns the slot under the cursor and the controller turns that into a state.
+##
+## It returns a WHEEL_SLOT, never a State — which is what lets one wheel serve
+## every squad type, since each scene maps the slots to its own orders.
 
-const SPRITE_SIZE: Vector2 = Vector2(32,32)
 
+#region ────────────────────────────  constants  ─────────────────────────────
+
+const SPRITE_SIZE: Vector2 = Vector2(32, 32)
+
+#endregion
+
+
+#region ──────────────────────────  configuration  ───────────────────────────
+
+@export_group("Colours")
 @export var bg_color: Color
 @export var line_color: Color
 @export var highlight_color: Color
 
-
+@export_group("Geometry")
 @export var outer_radius: int = 256
 @export var inner_radius: int = 64
 @export var line_width: int = 4
 
+@export_group("Slots")
+## Option 0 is the centre; the rest ring it clockwise. Each carries the slot
+## it commits to, so reordering this array cannot desync icon from meaning.
 @export var options: Array[WheelOption]
+@export_group("")
 
+#endregion
+
+
+#region ──────────────────────────────  state  ───────────────────────────────
+
+## Index into options. 0 means the centre is highlighted.
 var selection: int = 0
 
+#endregion
 
+
+#region ───────────────────────  opening and closing  ────────────────────────
 
 func open() -> void:
 	show()
 	set_process(true)
-
 
 func close() -> GlobalEnums.WHEEL_SLOT:
 	hide()
 	set_process(false)
 	return options[selection].slot
 
+#endregion
+
+
+#region ────────────────────────────  per-frame  ─────────────────────────────
+
+func _process(_delta: float) -> void:
+	var mouse_position: Vector2 = get_local_mouse_position()
+	var mouse_radius: float = mouse_position.length()
+	
+	if mouse_radius < inner_radius:
+		selection = 0
+	else:
+		var mouse_rads: float = fposmod((mouse_position.angle() + TAU/8) * -1, TAU)
+		selection = ceil((mouse_rads / TAU) * (len(options) - 1))
+	
+	
+	queue_redraw()
+
+#endregion
+
+
+#region ─────────────────────────────  drawing  ──────────────────────────────
 
 func _draw() -> void:
 	var offset: Vector2 = SPRITE_SIZE / -2
@@ -87,15 +135,5 @@ func _draw() -> void:
 				)
 	
 	
-func _process(_delta: float) -> void:
-	var mouse_position: Vector2 = get_local_mouse_position()
-	var mouse_radius: float = mouse_position.length()
-	
-	if mouse_radius < inner_radius:
-		selection = 0
-	else:
-		var mouse_rads: float = fposmod((mouse_position.angle() + TAU/8) * -1, TAU)
-		selection = ceil((mouse_rads / TAU) * (len(options) - 1))
-	
-	
-	queue_redraw()
+
+#endregion

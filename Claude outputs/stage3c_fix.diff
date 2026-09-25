@@ -1,0 +1,57 @@
+--- a/Player/controller.gd
++++ b/Player/controller.gd
+@@ -33,6 +33,8 @@
+ ## ownership is each squad's controller field, and squads are found through
+ ## Squad.GROUP, so where a squad sits never decides whose it is. Set by the
+ ## match for the players it builds; authored for the map's own controllers.
++## Must sit above whatever spawns squads in the scene tree — add_squad() says
++## why, and refuses when it does not.
+ @export var squads_root: Node
+ @export_group("")
+ 
+@@ -60,7 +62,18 @@
+ #region ───────────────────────────  squad roster  ───────────────────────────
+ 
+ ## Mechanic. Instantiate a squad, place it in the world, and take ownership.
++## The squad is ready by the time this returns — which is a claim about scene
++## order, so it is checked rather than hoped for.
+ func add_squad(scene: PackedScene, where: Vector3) -> Squad:
++	# Godot runs _ready() on a new child only if the parent has been readied
++	# itself (Node::_set_tree — "if (!data.parent || data.parent->
++	# data.ready_notified)"). Spawn into a node that has not had its turn and
++	# the squad enters the tree but stays half-built until that node readies:
++	# no camera mount, no units, no state machine. Tree order is the whole of
++	# it, and nothing in the inspector hints at it, so name it here.
++	if not squads_root.is_node_ready():
++		push_error("%s: Squads Root '%s' has not been readied yet, so a squad spawned into it would come back half-built. Move '%s' above whatever spawns squads in the scene tree." % [name, squads_root.name, squads_root.name])
++		return null
+ 	var new_squad: Squad = scene.instantiate() as Squad
+ 	if new_squad == null:
+ 		return null
+--- a/Map/map.gd
++++ b/Map/map.gd
+@@ -15,6 +15,9 @@
+ @export var terrain: Terrain3D
+ ## Where squads stand in the world. The match hands it to every controller it
+ ## builds, so custody belongs to the place rather than to any player.
++## Place it above the MatchManager in this scene: a squad spawned into a node
++## that has not been readied yet stays half-built. Controller.add_squad()
++## carries the explanation, and refuses rather than hand back a broken squad.
+ @export var squads_root: Node
+ 
+ @export_group("Sites")
+--- a/Player/rts_controller.gd
++++ b/Player/rts_controller.gd
+@@ -101,6 +101,12 @@
+ 	# starting group and then calls set_active_squad(), which is also what
+ 	# points the camera; _snap_next_frame has _process() cut to it on the
+ 	# first frame after that.
++	#
++	# That later set_active_squad() still reads the squad's @onready
++	# camera_mount, so the squads must be ready when the match calls it. The
++	# rule that used to live here — "the Squads container has to sit above this
++	# node" — did not go away with stage 3c; it moved to the node that now does
++	# the spawning. Controller.add_squad() enforces it.
+ 
+ func _input(event: InputEvent) -> void:
+ 	# Squad-independent commands first.

@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://blo06fum3fqma"]
 
 [ext_resource type="PackedScene" uid="uid://cpppiqty1a1pu" path="res://Assets/Models/skeleton_mage.glb" id="1_gt656"]
-[ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_vgabi"]
+[ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/Units/unit.gd" id="1_vgabi"]
 [ext_resource type="PackedScene" uid="uid://bva8v7auq3pek" path="res://Models/Components/weapon_component.tscn" id="4_7omsi"]
 [ext_resource type="PackedScene" uid="uid://dn65m18cm8q5q" path="res://Models/Components/health_component.tscn" id="4_qojfv"]
 [ext_resource type="Script" uid="uid://t124njj13ydl" path="res://Models/Components/Attack.gd" id="5_qojfv"]
-[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://Models/health_bar_3d.gd" id="6_wnveu"]
+[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://UI/health_bar_3d.gd" id="6_wnveu"]
 [ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="7_xlx51"]
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_wnveu"]

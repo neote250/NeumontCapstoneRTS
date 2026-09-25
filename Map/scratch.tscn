@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://ddw7a26sgwtag"]
 
 [ext_resource type="PackedScene" uid="uid://bb2lp50sjndus" path="res://Map/Environment.tscn" id="1_gcdra"]
-[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/unit.tscn" id="2_3kj03"]
+[ext_resource type="PackedScene" uid="uid://blo06fum3fqma" path="res://Models/Units/unit.tscn" id="2_3kj03"]
 
 [node name="Node3D" type="Node3D" unique_id=1182943826]
 

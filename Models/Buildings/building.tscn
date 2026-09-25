@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://b22aixrgx2s1n"]
 
-[ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/unit.gd" id="1_7xksg"]
+[ext_resource type="Script" uid="uid://c8bix14w662pw" path="res://Models/Units/unit.gd" id="1_7xksg"]
 [ext_resource type="PackedScene" uid="uid://bp62oq2f62qtf" path="res://Models/Buildings/grave_04.fbx" id="2_7xksg"]
 [ext_resource type="PackedScene" uid="uid://dn65m18cm8q5q" path="res://Models/Components/health_component.tscn" id="3_u1h07"]
 [ext_resource type="PackedScene" uid="uid://bva8v7auq3pek" path="res://Models/Components/weapon_component.tscn" id="4_1eq68"]
-[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://Models/health_bar_3d.gd" id="6_prxap"]
+[ext_resource type="Script" uid="uid://w2u3f1mdodbg" path="res://UI/health_bar_3d.gd" id="6_prxap"]
 [ext_resource type="PackedScene" uid="uid://mo5jvkpnqbaq" path="res://UI/health_bar.tscn" id="7_7371p"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wnveu"]
