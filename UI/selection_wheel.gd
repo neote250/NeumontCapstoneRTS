@@ -46,32 +46,39 @@ var selection: int = 0
 
 #region ───────────────────────  opening and closing  ────────────────────────
 
-func open() -> void:
+## Opened at the point the finger went down, so the wedges land under the thumb
+## that opened them rather than at the middle of the screen.
+func open(at: Vector2) -> void:
+	position = at
+	selection = 0
 	show()
-	set_process(true)
+	queue_redraw()
+
+## The pointer moved. Screen coordinates in, because the pointer layer does not
+## know where this control sits.
+func point_at(screen_position: Vector2) -> void:
+	var local: Vector2 = screen_position - position
+	if local.length() < inner_radius:
+		selection = 0
+	else:
+		var rads: float = fposmod((local.angle() + TAU / 8) * -1, TAU)
+		selection = int(ceil((rads / TAU) * (len(options) - 1)))
+	queue_redraw()
 
 func close() -> GlobalEnums.WHEEL_SLOT:
 	hide()
-	set_process(false)
 	return options[selection].slot
+
+## Closed without committing — the gesture was taken away.
+func cancel() -> void:
+	hide()
 
 #endregion
 
 
 #region ────────────────────────────  per-frame  ─────────────────────────────
 
-func _process(_delta: float) -> void:
-	var mouse_position: Vector2 = get_local_mouse_position()
-	var mouse_radius: float = mouse_position.length()
-	
-	if mouse_radius < inner_radius:
-		selection = 0
-	else:
-		var mouse_rads: float = fposmod((mouse_position.angle() + TAU/8) * -1, TAU)
-		selection = ceil((mouse_rads / TAU) * (len(options) - 1))
-	
-	
-	queue_redraw()
+##TODO Maybe have this region for animations?
 
 #endregion
 

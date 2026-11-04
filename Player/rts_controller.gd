@@ -34,6 +34,10 @@ const MAX_VISION_BONUS: int = 100
 ## minimap wants the map's bounds by then. The minimap camera is still
 ## hardcoded to this map's centre, which is the thing to look at when deciding.
 @export var map: Map
+## The pointer layer. An export rather than an @onready because the UI is a
+## child of this node, so PlayerUI._ready() runs first and needs to find this
+## already resolved — the same reason `map` is an export.
+@export var pointer: PointerInput
 @export_group("")
 
 #endregion
@@ -94,6 +98,7 @@ func _ready() -> void:
 	# through it, so this scene can be spawned on any map.
 	map.terrain.set_camera(camera)
 	ui.state_requested.connect(_on_state_requested)
+	pointer.tapped.connect(_on_tapped)
 	super()   # Controller: collect any squads the map placed for this player
 
 	# An empty roster is the normal state here — stage 0's guard is gone with
@@ -125,10 +130,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_spawn_unit"):
 		current_squad.roster.add_unit()
 	
-	# Commands for current squad
-	if event.is_action_pressed("target_command"):  # currently left click eventually TOUCH		and current_squad
-		player_click_on_map()
-	elif event.is_action_pressed("stop_command"):  # ... or ... 
+	if event.is_action_pressed("stop_command"):
 		current_squad.stop_movement()
 
 func _process(delta: float) -> void:
@@ -235,39 +237,33 @@ func _on_state_requested(new_state: GlobalEnums.WHEEL_SLOT) -> void:
 		return
 	current_squad.state_machine.change_state(current_squad.state_machine.states.get(new_state))
 
-###Handle result of a mouse click on map
-func player_click_on_map() -> void:
-	var mouse_pos: Vector2 = minimap.get_mouse_position() #get the mouse position based on the subviewport
-	
-	#Create the vector
-	var from: Vector3 = minimap_camera.project_ray_origin(mouse_pos)
-	var to: Vector3 = from + minimap_camera.project_ray_normal(mouse_pos) * 1000
-	#Setup data
-	var space_state:PhysicsDirectSpaceState3D = minimap_camera.get_world_3d().direct_space_state
-	var land_hit_query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to, 2)
-	#var squad_hit_query = PhysicsRayQueryParameters3D.create(from, to, 3)
-	
-	
-	#Get results
-	var result: Dictionary = space_state.intersect_ray(land_hit_query)
-	
-	#Check if result is a squad otherwise it is a position (or not a result)
-	
-	if result:
-		current_squad.movement.set_destination(result.position)
-		###DEBUG
-		ui.change_testing_data_text(result.position)
-	else: return
-	
-	# Add visual feedback at target position
+## A tap landed. TODO stage 2: a tap inside the minimap is a strategic move,
+## everything else should raycast `camera` against the world — which is the
+## change that makes movement usable. Today both go through the minimap.
+func _on_tapped(screen_position: Vector2) -> void:
+	if not is_instance_valid(current_squad):
+		return
+	var frame: Control = minimap.get_parent()
+	if not frame.get_global_rect().has_point(screen_position):
+		return
+	_order_move(minimap_camera, screen_position - frame.global_position)
+
+
+## Raycast a camera's viewport at `local_position` against the terrain layer and
+## send the squad there. Takes the camera so stage 2 can pass the main one.
+func _order_move(from_camera: Camera3D, local_position: Vector2) -> void:
+	var from: Vector3 = from_camera.project_ray_origin(local_position)
+	var to: Vector3 = from + from_camera.project_ray_normal(local_position) * 1000.0
+	var space: PhysicsDirectSpaceState3D = from_camera.get_world_3d().direct_space_state
+	# Mask 2 is layer 2, "terrain". Note for the targeting work: layer 3
+	# "squads" is mask 4, not 3 — mask 3 would be units + terrain.
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from, to, 2)
+	var result: Dictionary = space.intersect_ray(query)
+	if result.is_empty():
+		return
+	current_squad.movement.set_destination(result.position)
+	ui.change_testing_data_text(result.position)
 	enable_move_marker(result.position)
-
-###Handle result of a finger press on map
-func player_press_on_map() -> void:
-	pass
-
-
-
 
 
 

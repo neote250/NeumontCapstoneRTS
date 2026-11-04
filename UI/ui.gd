@@ -98,13 +98,12 @@ func _ready() -> void:
 	_build_squad_rows()
 	_refresh_status()
 	set_physics_process(_any_squad_building())
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("input_wheel"):
-		selection_wheel.open()
-	elif event.is_action_released("input_wheel"):
-		state_requested.emit(selection_wheel.close())
+	
+	var pointer: PointerInput = owning_player.pointer
+	pointer.long_press_started.connect(selection_wheel.open)
+	pointer.long_press_moved.connect(selection_wheel.point_at)
+	pointer.long_press_ended.connect(_on_wheel_committed)
+	pointer.gesture_cancelled.connect(selection_wheel.cancel)
 
 
 ## Only runs while something is under construction — see _on_any_build_changed.
@@ -128,6 +127,10 @@ func _watch_squad(squad: Squad) -> void:
 	for upgrade: Build in squad.economy.upgrades:
 		upgrade.building_changed.connect(_on_any_build_changed.bind(squad))
 
+## The finger lifted with the wheel open. The position is the pointer's; the
+## wheel already knows which wedge that landed in.
+func _on_wheel_committed(_position: Vector2) -> void:
+	state_requested.emit(selection_wheel.close())
 
 func _on_squad_added(squad: Squad) -> void:
 	_watch_squad(squad)

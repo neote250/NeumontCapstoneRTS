@@ -31,6 +31,7 @@ theme_override_font_sizes/font_size = 32
 text = "DEBUG DATA"
 
 [node name="SquadInfoPanel" type="Panel" parent="CanvasLayer" unique_id=2062448341]
+mouse_filter = 2
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_right = 200.0

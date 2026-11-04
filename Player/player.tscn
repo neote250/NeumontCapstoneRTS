@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bw06xtofvfhh6" path="res://Player/rts_controller.gd" id="1_btcbx"]
 [ext_resource type="PackedScene" uid="uid://cg2r12q47xhbd" path="res://UI/ui.tscn" id="2_gwnis"]
 [ext_resource type="PackedScene" uid="uid://bve0fqe41rqsl" path="res://UI/move_marker.tscn" id="3_k53q1"]
+[ext_resource type="Script" uid="uid://b6hwptdud2por" path="res://Player/pointer_input.gd" id="4_ptr01"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uf72f"]
 content_margin_left = 8.0
@@ -16,15 +17,20 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 shadow_size = 6
 
-[node name="Player" type="Node" unique_id=445925779 node_paths=PackedStringArray("squads_root")]
+[node name="Player" type="Node" unique_id=445925779 node_paths=PackedStringArray("squads_root", "pointer")]
 script = ExtResource("1_btcbx")
 team_id = 0
 squads_root = NodePath("")
+pointer = NodePath("PointerInput")
+
+[node name="PointerInput" type="Node" parent="."]
+script = ExtResource("4_ptr01")
 
 [node name="UI" parent="." unique_id=2052029974 node_paths=PackedStringArray("owning_player") instance=ExtResource("2_gwnis")]
 owning_player = NodePath("..")
 
 [node name="MinimapContainer" type="PanelContainer" parent="." unique_id=2076390449]
+mouse_filter = 2
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
